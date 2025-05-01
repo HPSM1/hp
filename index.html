@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Calculadora HPSM</title>
+    <style>
+        /* Estilos Gerais e Estrutura */
+        * { box-sizing: border-box; }
+
+        html, body {
+            height: auto;
+            overflow: auto;
+        }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            background-color: #f0f4f8;
+            font-size: 14px;
+            min-height: 100vh;
+        }
+
+        .container { /* Área dos Medicamentos */
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 10px 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+            gap: 8px;
+        }
+        .item-name {
+            flex: 1;
+            font-weight: 500;
+            min-width: 100px;
+            word-break: break-word;
+        }
+        .controls {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        input[type="number"] {
+            width: 50px;
+            padding: 5px;
+            font-size: 14px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            height: 30px;
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+             -webkit-appearance: none;
+             margin: 0;
+        }
+        button {
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            line-height: 1.2;
+            min-height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        button:hover {
+            background-color: #e0e0e0;
+            border-color: #bbb;
+        }
+         button:active {
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .controls button { /* Para botões + e - */
+           width: 30px;
+           height: 30px;
+           padding: 0;
+           font-size: 16px;
+        }
+        /* <<< MUDANÇA AQUI: Padding horizontal do botão Max aumentado >>> */
+        .max-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            /* Padding: Vertical (7px mantido) Horizontal (aumentado para 15px) */
+            padding: 7px 15px; /* Alterado de 7px 10px */
+            font-size: 12px;
+            height: 30px; /* Mantida da versão anterior */
+        }
+        .max-button:hover { background-color: #0056b3; }
+
+        .bottom-section { /* Área de Controles */
+            background: #ffffff;
+            padding: 15px;
+            margin: 10px;
+            margin-top: 5px;
+            border-top: 1px solid #e0e0e0;
+            border-radius: 10px;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 10px 15px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .checkbox-item {
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: 3px 0;
+        }
+        input[type="checkbox"] {
+            cursor: pointer;
+            width: 17px;
+            height: 17px;
+            accent-color: #007bff;
+        }
+        .total-box {
+            font-size: clamp(20px, 5vw, 24px);
+            font-weight: bold;
+            color: #28a745;
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 12px;
+            background-color: #eaf7ec;
+            border-radius: 8px;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        /* --- Estilos Específicos dos Botões --- */
+        .action-buttons button { background-color: #cfe2ff; border: 1px solid #b8daff; color: #004085; }
+        .action-buttons button:hover { background-color: #b8daff; }
+        .action-buttons button.active { background-color: #004085; color: #ffffff; border-color: #003066; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
+         .count-control-group { display: flex; align-items: center; gap: 5px; }
+         #btn-10x10 { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+         #btn-10x10:hover { background-color: #ffeeba; }
+         #btn-10x10-minus { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; width: 30px; height: 30px; padding: 0; font-size: 16px; font-weight: bold; }
+         #btn-10x10-minus:hover { background-color: #f5c6cb; }
+        .reset-button { font-size: 12px; font-weight: bold; background-color: #dc3545; color: white; border-radius: 5px; padding: 6px 12px; margin-left: auto; border: none; flex-shrink: 0; cursor: pointer; transition: background-color 0.2s ease; }
+        .reset-button:hover { background-color: #c82333; }
+        .extra-buttons button { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+         .extra-buttons button:hover { background-color: #bee5eb; }
+        .extra-buttons button.active { background-color: #0c5460; color: #ffffff; border-color: #083a42; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
+        .info-buttons { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .info-buttons button { flex-grow: 1; background-color: #ffc107; color: #3b2a00; border: none; font-size: 13px; padding: 10px 8px; min-width: 100px; }
+        .info-buttons button:hover { background-color: #e0a800; }
+         #anotacoesButton { background-color: #6c757d; color: white; }
+         #anotacoesButton:hover { background-color: #5a6268; }
+         #gessoInfoButton { background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; }
+         #gessoInfoButton:hover { background-color: #aeeaf9; }
+
+
+        /* --- Listas Ocultáveis e Anotações --- */
+        .toggle-list, #anotacoesBox { display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); margin-top: 10px; border: 1px solid #dee2e6; }
+        .toggle-list ul { list-style: none; padding: 0; margin: 0; }
+        .toggle-list li { margin-bottom: 8px; font-size: 13px; color: #343a40; line-height: 1.5; }
+        .toggle-list li:last-child { margin-bottom: 0; }
+        .toggle-list b { color: #0056b3; font-weight: 600; }
+        .toggle-list .dosage { font-size: 11px; color: #6c757d; margin-left: 5px; }
+         .toggle-list h4 { margin-top: 10px; margin-bottom: 5px; font-size: 14px; color: #004085; border-bottom: 1px solid #cfe2ff; padding-bottom: 3px; }
+         .toggle-list h4:first-of-type { margin-top: 0; }
+         #receitasList li, #gessoInfoList li { margin-left: 10px; font-size: 12px; color: #495057; }
+         #gessoInfoList ul { padding-left: 20px; list-style: disc; margin-bottom: 10px; }
+         #gessoInfoList li { margin-bottom: 6px; }
+        #anotacoesArea { width: 100%; min-height: 100px; border: 1px solid #ced4da; border-radius: 4px; padding: 10px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 8px; }
+        .clear-anotacoes-button { background-color: #dc3545; color: white; border: none; padding: 6px 10px; font-size: 12px; font-weight: 500; cursor: pointer; border-radius: 5px; transition: background-color 0.2s ease; float: right; }
+        .clear-anotacoes-button:hover { background-color: #c82333; }
+
+
+        /* --- Mobile Adjustments --- */
+        @media (max-width: 600px) {
+            body { font-size: 13px; }
+            .container { padding: 5px; gap: 6px; }
+             .item { padding: 8px 10px; gap: 5px; }
+            .bottom-section { padding: 10px; margin: 5px; margin-top: 2px; }
+            .info-buttons { gap: 5px; }
+            .info-buttons button { min-width: 70px; padding: 8px 5px; font-size: 11px; }
+             .button-group { gap: 5px; }
+             .action-buttons button, .extra-buttons button { padding: 5px 8px; font-size: 11px; }
+             .item-name { font-size: 13px; min-width: 70px; line-height: 1.3; }
+             input[type="number"] { width: 40px; height: 28px; padding: 4px; font-size: 13px; }
+             .controls button { width: 28px; height: 28px; font-size: 14px; } /* +/- */
+             /* <<< MUDANÇA AQUI: Padding horizontal do botão Max aumentado no mobile >>> */
+             .max-button {
+                 width: auto;
+                 height: 28px;     /* Mantida da versão anterior */
+                 /* Padding: Vertical (6px mantido) Horizontal (aumentado para 12px) */
+                 padding: 6px 12px; /* Alterado de 6px 8px */
+                 font-size: 11px;
+             }
+            .total-box { padding: 10px; font-size: clamp(18px, 4vw, 22px); }
+             #btn-10x10 { font-size: 11px; }
+             #btn-10x10-minus { width: 28px; height: 28px; font-size: 14px; }
+             .toggle-list, #anotacoesBox { padding: 10px; }
+             .toggle-list li, #receitasList li, #gessoInfoList li { font-size: 11px; }
+             .toggle-list h4 { font-size: 13px; }
+             #anotacoesArea { font-size: 12px; min-height: 80px; }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container" id="items"></div> <div class="bottom-section">
+        <div class="checkbox-group">
+            <label class="checkbox-item">
+                <input type="checkbox" id="atendimentoCheckbox" /> Atendimento (R$ 1k)
+            </label>
+            <label class="checkbox-item">
+                <input type="checkbox" id="pmArcanjoCheckbox" /> PM/Arcanjos
+            </label>
+            <label class="checkbox-item">
+                <input type="checkbox" id="cnpjCheckbox" /> CNPJ
+            </label>
+            <button class="reset-button" onclick="resetar()" aria-label="Resetar Tudo">Resetar</button>
+        </div>
+
+        <div class="total-box">
+            Total: R$ <span id="total">0.00</span>
+        </div>
+
+        <div class="button-group action-buttons" id="presetButtonsContainer">
+            <button data-preset="TUDO">TUDO</button>
+            <button data-preset="P">P</button>
+            <button data-preset="M">M</button>
+            <button data-preset="G">G</button>
+            <button data-preset="GG">GG</button>
+            <div class="count-control-group">
+                 <button id="btn-10x10" onclick="add10x10()">10x10 (<span id="x10count">0x</span>)</button>
+                 <button id="btn-10x10-minus" onclick="remove10x10()" aria-label="Remover 10x10">-</button>
+            </div>
+        </div>
+
+        <div class="button-group extra-buttons" id="extraButtonsContainer">
+             <button data-name="Raio-X" data-value="1600">Raio-X</button>
+            <button data-name="Gesso Extra" data-value="1600">Gesso</button>
+            <button data-name="Queimadura" data-value="1600">Queimadura</button>
+            <button data-name="Resgate Norte" data-value="1500">Resgate Norte</button>
+            <button data-name="Exames" data-value="3000">Exames</button>
+            <button data-name="Ressonância" data-value="5000">Ressonância</button>
+        </div>
+
+        <div class="info-buttons">
+             <button id="dipironaButton" onclick="toggleDipironaList()">S/Dipirona</button>
+            <button id="anotacoesButton" onclick="toggleAnotacoes()">Anotações</button>
+            <button id="receitasButton" onclick="toggleReceitasList()">Receitas</button>
+            <button id="gessoInfoButton" onclick="toggleGessoInfoList()">Gesso</button>
+        </div>
+
+        <div class="toggle-list" id="dipironaList">
+             <ul>
+                 <li><b>Ibuprofeno</b> <span class="dosage">(Ex: 400mg ou 600mg)</span> (anti-inflamatório)</li>
+                 <li><b>Cetoprofeno</b> <span class="dosage">(Ex: 50mg ou 100mg)</span> (anti-inflamatório)</li>
+                 <li><b>Paracetamol</b> <span class="dosage">(Ex: 500mg ou 750mg)</span> (analgésico, antitérmico)</li>
+                 <li><b>Diclofenaco</b> <span class="dosage">(Ex: 50mg)</span> (anti-inflamatório, dor muscular)</li>
+                 <li><b>Flurbiprofeno</b> <span class="dosage">(Ex: 50mg ou 100mg)</span> (anti-inflamatório, dor muscular)</li>
+                 <li><b>Clorfeniramina</b> <span class="dosage">(Ex: 4mg)</span> (antialérgico)</li>
+             </ul>
+        </div>
+         <div id="anotacoesBox">
+             <textarea id="anotacoesArea" placeholder="Digite suas anotações aqui..."></textarea>
+             <button id="clearAnotacoesButton" class="clear-anotacoes-button">Apagar Tudo</button>
+         </div>
+        <div class="toggle-list" id="receitasList">
+             <h4>Receita - Panqueca</h4> <ul> <li>6x Trigos</li> <li>2x Carnes</li> </ul>
+             <h4>Receita - Sanduíche</h4> <ul> <li>3x Tomates</li> <li>3x Trigos</li> <li>2x Frangos</li> </ul>
+             <h4>Receita - Suco</h4> <ul> <li>6x Laranjas ou Morangos</li> <li>2x Garrafas de Água</li> </ul>
+             <h4>Receita - Café com Leite</h4> <ul> <li>6x Grãos de Café</li> <li>2x Garrafas de Leite</li> </ul>
+        </div>
+         <div class="toggle-list" id="gessoInfoList">
+             <h4>Masculino:</h4>
+             <ul>
+                 <li><b>Braço Esquerdo:</b> Camisa 223</li>
+                 <li><b>Braço Direito:</b> Colete 64</li>
+                 <li><b>Perna Esquerda:</b> Adesivo 245</li>
+                 <li><b>Perna Direita:</b> Adesivo 246</li>
+                 <li><b>Parte inferior:</b> Calça 56</li>
+                 <li><b>Tronco:</b> Jaqueta 649</li>
+             </ul>
+             <h4>Feminino:</h4>
+             <ul>
+                 <li><b>Braço Esquerdo:</b> Colete 64</li>
+                 <li><b>Braço Direito:</b> Camisa 269</li>
+                 <li><b>Perna Esquerda:</b> Adesivo 261</li>
+                 <li><b>Perna Direita:</b> Adesivo 262 (quando só a perna esquerda estiver fraturada)</li>
+                 <li><b>Perna Direita:</b> sapato 166</li>
+                 <li><b>Parte inferior:</b> Calça 57</li>
+                 <li><b>Tronco:</b> Jaqueta 724</li>
+             </ul>
+         </div>
+    </div>
+
+    <script>
+        // --- Configuração Inicial ---
+        const produtosBase = [
+            { nome: 'Adrenalina', precoBase: 8000, precoCNPJ: 6500, precoPMArcanjo: 7000, maximo: 3 },
+            { nome: 'Medkit', precoBase: 1500, precoCNPJ: 1000, precoPMArcanjo: 1000, maximo: 2 },
+            { nome: 'Atadura', precoBase: 200, precoCNPJ: 100, precoPMArcanjo: 100, maximo: 10 },
+            { nome: 'Bandagem', precoBase: 300, precoCNPJ: 250, precoPMArcanjo: 300, maximo: 5 },
+            { nome: 'Analgésico', precoBase: 400, precoCNPJ: 350, precoPMArcanjo: 250, maximo: 10 },
+            { nome: 'Sinkalm', precoBase: 500, precoCNPJ: 300, precoPMArcanjo: 400, maximo: 5 },
+            { nome: 'Ritmoneury', precoBase: 500, precoCNPJ: null, precoPMArcanjo: null, maximo: 5 },
+        ];
+
+        // Estado da aplicação
+        const quantidades = {};
+        const extraItemsState = {};
+        let x10count = 0;
+        let activePreset = null;
+
+        // Referências aos elementos do DOM
+        const itemsContainer = document.getElementById('items');
+        const totalElement = document.getElementById('total');
+        const atendimentoCheckbox = document.getElementById('atendimentoCheckbox');
+        const cnpjCheckbox = document.getElementById('cnpjCheckbox');
+        const pmArcanjoCheckbox = document.getElementById('pmArcanjoCheckbox');
+        const x10Display = document.getElementById('x10count');
+        const dipironaList = document.getElementById('dipironaList');
+        const receitasList = document.getElementById('receitasList');
+        const anotacoesBox = document.getElementById('anotacoesBox');
+        const anotacoesArea = document.getElementById('anotacoesArea');
+        const clearAnotacoesButton = document.getElementById('clearAnotacoesButton');
+        const extraButtonsContainer = document.getElementById('extraButtonsContainer');
+        const presetButtonsContainer = document.getElementById('presetButtonsContainer');
+        const gessoInfoList = document.getElementById('gessoInfoList');
+
+        // --- Funções de Cálculo e Atualização ---
+        function getCurrentPrice(produto) {
+            if (cnpjCheckbox.checked && produto.precoCNPJ !== null) { return produto.precoCNPJ; }
+            else if (pmArcanjoCheckbox.checked && produto.precoPMArcanjo !== null) { return produto.precoPMArcanjo; }
+            return produto.precoBase;
+         }
+        function updateItemPriceDisplay() {
+           const itemElements = itemsContainer.querySelectorAll('.item');
+           itemElements.forEach((itemElement, index) => {
+               const produto = produtosBase[index];
+               const nameElement = itemElement.querySelector('.item-name');
+               if (nameElement) {
+                   const currentPrice = getCurrentPrice(produto);
+                   nameElement.textContent = `${produto.nome} (R$${currentPrice.toLocaleString('pt-BR')})`;
+               }
+           });
+         }
+        function atualizarTotal() {
+            let subtotalItens = 0;
+            produtosBase.forEach((produto, index) => {
+                const qtd = quantidades[index] || 0;
+                const precoUnit = getCurrentPrice(produto);
+                subtotalItens += precoUnit * qtd;
+            });
+            let totalExtras = 0;
+            for (const name in extraItemsState) {
+                if (extraItemsState[name].active) { totalExtras += extraItemsState[name].value; }
+            }
+            const valorAtendimento = atendimentoCheckbox.checked ? 1000 : 0;
+            const valor10x10Total = x10count * 5000;
+            const totalFinal = subtotalItens + totalExtras + valorAtendimento + valor10x10Total;
+            totalElement.textContent = totalFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // --- Funções de Interação (Toggles e Botões) ---
+        function closeOtherPanels(currentPanelId) {
+            const panels = [dipironaList, receitasList, anotacoesBox, gessoInfoList];
+            panels.forEach(panel => {
+                if (panel && panel.id !== currentPanelId) {
+                    panel.style.display = 'none';
+                }
+            });
+        }
+        function toggleDipironaList() { closeOtherPanels('dipironaList'); const display = dipironaList.style.display; dipironaList.style.display = display === 'none' || display === '' ? 'block' : 'none'; }
+        function toggleReceitasList() { closeOtherPanels('receitasList'); const display = receitasList.style.display; receitasList.style.display = display === 'none' || display === '' ? 'block' : 'none'; }
+        function toggleAnotacoes() { closeOtherPanels('anotacoesBox'); const display = anotacoesBox.style.display; anotacoesBox.style.display = display === 'none' || display === '' ? 'block' : 'none'; if (anotacoesBox.style.display === 'block') { anotacoesArea.focus(); } }
+        function toggleGessoInfoList() { closeOtherPanels('gessoInfoList'); const display = gessoInfoList.style.display; gessoInfoList.style.display = display === 'none' || display === '' ? 'block' : 'none'; }
+
+        function toggleExtra(buttonElement) {
+           const name = buttonElement.dataset.name;
+           const value = parseInt(buttonElement.dataset.value, 10);
+           if (!extraItemsState[name]) { extraItemsState[name] = { value: value, active: false }; }
+           extraItemsState[name].active = !extraItemsState[name].active;
+           buttonElement.classList.toggle('active', extraItemsState[name].active);
+           atualizarTotal();
+         }
+        function add10x10() { x10count++; x10Display.textContent = `${x10count}x`; atualizarTotal(); }
+        function remove10x10() { if (x10count > 0) { x10count--; x10Display.textContent = `${x10count}x`; atualizarTotal(); } }
+
+        function resetar() {
+            for (let i = 0; i < produtosBase.length; i++) {
+                quantidades[i] = 0;
+                const inputElement = itemsContainer.children[i]?.querySelector('input[type="number"]');
+                if (inputElement) inputElement.value = 0;
+            }
+            atendimentoCheckbox.checked = false; cnpjCheckbox.checked = false; pmArcanjoCheckbox.checked = false;
+            for (const name in extraItemsState) { extraItemsState[name].active = false; }
+            extraButtonsContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+            activePreset = null;
+            presetButtonsContainer.querySelectorAll('button[data-preset]').forEach(btn => btn.classList.remove('active'));
+            x10count = 0; x10Display.textContent = `${x10count}x`;
+            updateItemPriceDisplay();
+            atualizarTotal();
+            dipironaList.style.display = 'none'; receitasList.style.display = 'none'; anotacoesBox.style.display = 'none'; gessoInfoList.style.display = 'none';
+        }
+
+        function handlePresetClick(tipo) {
+            const targetButton = presetButtonsContainer.querySelector(`button[data-preset="${tipo}"]`);
+            if (tipo === activePreset) {
+                resetar();
+            } else {
+                for (let i = 0; i < produtosBase.length; i++) {
+                    quantidades[i] = 0;
+                    const inputElement = itemsContainer.children[i]?.querySelector('input[type="number"]');
+                    if (inputElement) inputElement.value = 0;
+                }
+                atendimentoCheckbox.checked = false; cnpjCheckbox.checked = false; pmArcanjoCheckbox.checked = false;
+                x10count = 0; x10Display.textContent = `${x10count}x`;
+                if (activePreset) {
+                    const previousButton = presetButtonsContainer.querySelector(`button[data-preset="${activePreset}"]`);
+                    if (previousButton) previousButton.classList.remove('active');
+                }
+                switch (tipo) {
+                    case 'P':  setQuant('Atadura', 10); setQuant('Bandagem', 5); setQuant('Medkit', 2); break;
+                    case 'M':  setQuant('Atadura', 10); setQuant('Bandagem', 5); setQuant('Medkit', 2); setQuant('Analgésico', 10); break;
+                    case 'G':  setQuant('Atadura', 10); setQuant('Bandagem', 5); setQuant('Medkit', 2); setQuant('Analgésico', 10); setQuant('Adrenalina', 1); break;
+                    case 'GG': setQuant('Atadura', 10); setQuant('Bandagem', 5); setQuant('Medkit', 2); setQuant('Analgésico', 10); setQuant('Adrenalina', 3); break;
+                    case 'TUDO': produtosBase.forEach(prod => setQuant(prod.nome, prod.maximo)); break;
+                }
+                if(targetButton) targetButton.classList.add('active');
+                activePreset = tipo;
+                updateItemPriceDisplay();
+                atualizarTotal();
+            }
+        }
+
+        function setQuant(nomeProduto, quantidade) {
+            const index = produtosBase.findIndex(p => p.nome === nomeProduto);
+            if (index !== -1) {
+                const qtdFinal = Math.min(quantidade, produtosBase[index].maximo);
+                quantidades[index] = qtdFinal;
+                const inputElement = itemsContainer.children[index]?.querySelector('input[type="number"]');
+                 if (inputElement) inputElement.value = qtdFinal;
+            }
+        }
+
+        function criarItem(produto, index) {
+           quantidades[index] = 0;
+           const itemDiv = document.createElement('div'); itemDiv.className = 'item';
+           const name = document.createElement('div'); name.className = 'item-name';
+           name.textContent = `${produto.nome} (R$${produto.precoBase.toLocaleString('pt-BR')})`;
+           const controls = document.createElement('div'); controls.className = 'controls';
+
+           const menos = document.createElement('button'); menos.textContent = '-'; menos.setAttribute('aria-label', `Diminuir ${produto.nome}`);
+           menos.addEventListener('click', () => {
+               let val = parseInt(input.value) || 0;
+               if (val > 0) {
+                   input.value = --val;
+                   quantidades[index] = val;
+                   atualizarTotal();
+                   activePreset=null;
+                   presetButtonsContainer.querySelectorAll('button[data-preset]').forEach(btn => btn.classList.remove('active'));
+                }
+            });
+
+           const input = document.createElement('input'); input.type = 'number'; input.value = '0'; input.min = '0';
+           input.setAttribute('aria-label', `Quantidade de ${produto.nome}`);
+           input.addEventListener('input', () => {
+                let val = parseInt(input.value) || 0;
+                if (val < 0) { val = 0; input.value = val; }
+                quantidades[index] = val; // Valor digitado é armazenado sem limite
+                atualizarTotal();
+                activePreset = null;
+                presetButtonsContainer.querySelectorAll('button[data-preset]').forEach(btn => btn.classList.remove('active'));
+            });
+
+           const mais = document.createElement('button'); mais.textContent = '+'; mais.setAttribute('aria-label', `Aumentar ${produto.nome}`);
+           mais.addEventListener('click', () => {
+               let val = parseInt(input.value) || 0;
+               if (val < produto.maximo) {
+                   input.value = ++val;
+                   quantidades[index] = val;
+                   atualizarTotal();
+                   activePreset=null;
+                   presetButtonsContainer.querySelectorAll('button[data-preset]').forEach(btn => btn.classList.remove('active'));
+               }
+           });
+
+           const maxBtn = document.createElement('button'); maxBtn.className = 'max-button'; maxBtn.textContent = 'Máx'; maxBtn.setAttribute('aria-label', `Definir máximo para ${produto.nome}`);
+           maxBtn.addEventListener('click', () => {
+               input.value = produto.maximo;
+               quantidades[index] = produto.maximo;
+               atualizarTotal();
+               activePreset=null;
+               presetButtonsContainer.querySelectorAll('button[data-preset]').forEach(btn => btn.classList.remove('active'));
+           });
+
+           controls.appendChild(menos); controls.appendChild(input); controls.appendChild(mais); controls.appendChild(maxBtn);
+           itemDiv.appendChild(name); itemDiv.appendChild(controls);
+           itemsContainer.appendChild(itemDiv);
+         }
+
+
+        // --- Inicialização da Aplicação ---
+        function init() {
+            produtosBase.forEach((produto, index) => criarItem(produto, index));
+            atendimentoCheckbox.addEventListener('change', atualizarTotal);
+            cnpjCheckbox.addEventListener('change', () => { if (cnpjCheckbox.checked) pmArcanjoCheckbox.checked = false; updateItemPriceDisplay(); atualizarTotal(); });
+            pmArcanjoCheckbox.addEventListener('change', () => { if (pmArcanjoCheckbox.checked) cnpjCheckbox.checked = false; updateItemPriceDisplay(); atualizarTotal(); });
+
+            extraButtonsContainer.querySelectorAll('button[data-name]').forEach(button => {
+                const name = button.dataset.name;
+                const value = parseInt(button.dataset.value, 10);
+                if (name && !isNaN(value)) {
+                    extraItemsState[name] = { value: value, active: false };
+                     button.addEventListener('click', () => toggleExtra(button));
+                }
+            });
+
+             presetButtonsContainer.querySelectorAll('button[data-preset]').forEach(button => {
+                 button.addEventListener('click', () => handlePresetClick(button.dataset.preset));
+             });
+
+            if (clearAnotacoesButton && anotacoesArea) {
+                clearAnotacoesButton.addEventListener('click', () => { anotacoesArea.value = ''; });
+            }
+            atualizarTotal();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+
+    </script>
+</body>
+</html>
