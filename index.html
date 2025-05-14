@@ -3,371 +3,646 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Calculadora HPSM</title>
+    <title>Calculadora Hospital Santa Marcelina</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Alice&display=swap');
+
         /* Estilos Gerais e Estrutura */
+        :root {
+            --hospital-primary: #1A4A7F; /* Dark Blue from logo */
+            --hospital-secondary: #3B8BCB; /* Medium Blue from logo */
+            --hospital-light: #7CBCE6; /* Light Blue from logo */
+            --hospital-very-light: #ADDDF6; /* Very Light Blue from logo */
+            --hospital-accent: #FFC107; /* Existing accent, can be kept or changed */
+            --hospital-background: #f0f4f8;
+            --hospital-card-background: #ffffff;
+            --hospital-text-on-dark: #ffffff;
+            --hospital-text-on-light: #333333;
+            --hospital-danger: #dc3545;
+            --hospital-success: #28a745;
+            --hospital-button-gray-bg: #e9ecef;
+            --hospital-button-gray-text: #495057;
+            --hospital-button-gray-border: #ced4da;
+        }
+
         * { box-sizing: border-box; }
 
         html, body {
             height: auto;
             overflow: auto;
+            scroll-behavior: smooth;
         }
         body {
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             margin: 0;
-            background-color: #f0f4f8;
+            background-color: var(--hospital-background); /* Cor de fundo principal, ficará atrás da imagem com opacidade */
+            /* A imagem de background original foi movida para o pseudo-elemento ::before para controle de opacidade */
             font-size: 14px;
             min-height: 100vh;
+            color: var(--hospital-text-on-light);
+            /* Opcional: position: relative; pode ser útil em alguns cenários de empilhamento complexos. */
+            /* Opcional: overflow-x: hidden; para prevenir barras de rolagem horizontais inesperadas. */
         }
 
-        .container { /* Área dos Medicamentos */
-            padding: 10px;
+        /* MODIFICAÇÃO: Pseudo-elemento para a imagem de background "Logo" com opacidade */
+        body::before {
+            content: '';
+            position: fixed; /* Faz com que a imagem de fundo cubra toda a área visível e permaneça fixa durante a rolagem */
+            top: 0;
+            left: 0;
+            right: 0; /* Garante cobertura total */
+            bottom: 0; /* Garante cobertura total */
+            background-image: url('Logo.png'); /* Caminho para sua imagem "Logo" */
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            opacity: 0.15; /* <<< AJUSTE A OPACIDADE AQUI (0.0 = transparente, 1.0 = opaco). Ex: 0.15 para 15% */
+            z-index: -1; /* Coloca o pseudo-elemento atrás de todo o conteúdo do body */
+            pointer-events: none; /* Garante que o pseudo-elemento não capture eventos do mouse */
+        }
+
+        .site-header {
+            /* MODIFICAÇÃO: Cor do header */
+            background-color: #00a1d4; /* Mantido o header com sua própria cor de fundo sólida por cima da imagem do body */
+            color: var(--hospital-text-on-dark);
+            padding: 10px 15px;
             display: flex;
-            flex-direction: column;
-            gap: 10px;
+            align-items: center; /* Ensures logo and title are vertically aligned */
+            justify-content: center; /* Added to center logo and title block */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative; /* Para garantir que o header fique acima do pseudo-elemento body::before */
+            z-index: 1; /* Para garantir que o header fique acima do pseudo-elemento body::before */
+        }
+        .site-header img {
+            height: 32px; /* Default height, will be adjusted for mobile */
+            margin-right: 12px; /* Default margin */
+        }
+        .site-header h1 {
+            font-size: 1.4em; /* Default font size */
+            margin: 0;
+            font-weight: 500;
+            white-space: nowrap; /* Try to keep title on one line */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center; /* Added to center text within h1 if it's wider */
+            /* MODIFICAÇÃO: Fonte do título */
+            font-family: 'Alice', sans-serif;
         }
 
+        /* --- LAYOUT GRID (4 COLUNAS) PARA MEDICAMENTOS E RESUMO --- */
+        .container {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            align-items: stretch; /* Changed from start to stretch for consistent card heights if possible */
+            position: relative; /* Para garantir que o container fique acima do pseudo-elemento body::before */
+            z-index: 0; /* Ou qualquer valor >= 0, mas menor que o z-index de elementos que devem sobrepor, como modais */
+        }
+
+        /* --- ESTILO DOS CARDS DE MEDICAMENTO --- */
         .item {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            background-color: #fff;
+            background-color: var(--hospital-card-background);
             border-radius: 8px;
-            padding: 10px 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.07);
-            gap: 8px;
+            padding: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            gap: 6px;
+            position: relative;
+            width: 100%;
+            justify-content: space-between;
+            min-height: 185px;
         }
+        .item-wrapper { /* Used for Sinkalm */
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            height: 100%; /* Allow wrapper to fill grid cell if align-items: stretch is on container */
+            background-color: var(--hospital-card-background);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 8px;
+        }
+        .item-wrapper > .item { /* Item inside Sinkalm wrapper */
+            padding: 0;
+            box-shadow: none;
+            min-height: auto;
+            background-color: transparent;
+            margin-bottom: 0;
+            flex-grow: 1; /* Allow the item part to take available space */
+        }
+         .item-wrapper .inline-preset-box {
+            flex-shrink: 0; /* Prevent this box from shrinking too much */
+        }
+
+
+        .item-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+         .item-top-buttons {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+
         .item-name {
-            flex: 1;
-            font-weight: 500;
-            min-width: 100px;
+            font-weight: 600;
+            font-size: 11px;
+            text-align: left;
+            flex-grow: 1;
+            margin-right: 5px;
             word-break: break-word;
         }
+
+        .item-image {
+            width: 60%; /* Adjusted for slightly larger image */
+            max-width: 75px; /* Adjusted max-width */
+            height: auto;
+            aspect-ratio: 1 / 1;
+            object-fit: contain;
+            cursor: pointer;
+            margin-top: 5px; /* Adjusted margin */
+            margin-bottom: 5px; /* Adjusted margin */
+            transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        .item-image:active {
+            transform: scale(0.90);
+            transition-duration: 0.1s;
+        }
+
+        /* --- CONTROLES +/- e INPUT --- */
         .controls {
             display: flex;
             gap: 5px;
             align-items: center;
-            flex-shrink: 0;
+            justify-content: center;
+            width: 100%;
+            margin-top: auto; /* Pushes controls to bottom */
         }
+
         input[type="number"] {
-            width: 50px;
-            padding: 5px;
-            font-size: 14px;
-            text-align: center;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            height: 30px;
-            -moz-appearance: textfield;
-            appearance: textfield;
+            width: 40px; padding: 4px; font-size: 13px; text-align: center; border: 1px solid #ccc;
+            border-radius: 4px; height: 28px; -moz-appearance: textfield; appearance: textfield;
+            color: var(--hospital-text-on-light);
         }
         input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-             -webkit-appearance: none;
-             margin: 0;
-        }
+        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
         button {
-            padding: 6px 10px;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            border: 1px solid #ccc;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-            transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-            line-height: 1.2;
-            min-height: 30px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+            padding: 6px 10px; font-size: 12px; font-weight: 500; cursor: pointer;
+            border: 1px solid var(--hospital-button-gray-border); background-color: var(--hospital-button-gray-bg);
+            color: var(--hospital-button-gray-text); border-radius: 5px;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+            line-height: 1.2; min-height: 30px; display: inline-flex; align-items: center;
+            justify-content: center; white-space: nowrap;
         }
-        button:hover {
-            background-color: #e0e0e0;
-            border-color: #bbb;
+        button:hover { background-color: #e0e0e0; border-color: #bbb; }
+        button:active { box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); transform: scale(0.98); }
+
+        .controls button { /* +/- buttons in item card */
+            width: 28px; height: 28px; padding: 0; font-size: 15px; flex-shrink: 0;
         }
-         button:active {
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+        .decrement-max-button {
+            background-color: var(--hospital-danger); color: var(--hospital-text-on-dark); border: none;
+            padding: 0; width: 24px; height: 24px; font-size: 14px; border-radius: 4px; flex-shrink: 0;
         }
-        .controls button { /* Para botões + e - */
-           width: 30px;
-           height: 30px;
-           padding: 0;
-           font-size: 16px;
-        }
-        /* <<< MUDANÇA AQUI: Padding horizontal do botão Max aumentado >>> */
+        .decrement-max-button:hover { background-color: #c82333; }
+
+
         .max-button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            /* Padding: Vertical (7px mantido) Horizontal (aumentado para 15px) */
-            padding: 7px 15px; /* Alterado de 7px 10px */
-            font-size: 12px;
-            height: 30px; /* Mantida da versão anterior */
+            background-color: var(--hospital-secondary); color: var(--hospital-text-on-dark); border: none;
+            padding: 4px 10px; font-size: 10px; height: 24px; flex-shrink: 0; border-radius: 4px;
         }
-        .max-button:hover { background-color: #0056b3; }
+        .max-button:hover { background-color: var(--hospital-primary); }
 
-        .bottom-section { /* Área de Controles */
-            background: #ffffff;
-            padding: 15px;
-            margin: 10px;
-            margin-top: 5px;
-            border-top: 1px solid #e0e0e0;
-            border-radius: 10px;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+        /* --- CAIXA DE RESUMO/TOTAL --- */
+        .total-summary-box {
+            background-color: var(--hospital-card-background); border-radius: 8px; padding: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; flex-direction: column;
+            align-items: stretch; gap: 6px; height: 100%; /* Allow to stretch */
+            min-height: 185px; /* Match item height */
         }
 
-        .checkbox-group {
-            display: flex;
-            gap: 10px 15px;
-            margin-bottom: 15px;
-            align-items: center;
-            flex-wrap: wrap;
+        .total-summary-box .total-box-main {
+            font-size: clamp(18px, 4vw, 22px); font-weight: bold; color: var(--hospital-success);
+            text-align: center; padding: 8px 5px; background-color: #eaf7ec; border-radius: 6px;
+            display: flex; justify-content: center; align-items: baseline; gap: 0.3em;
         }
-        .checkbox-item {
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            padding: 3px 0;
+        .total-summary-box .total-box-main span { display: inline; }
+
+        .total-summary-box .total-breakdown {
+            font-size: 11px; color: #454545; padding: 4px 0px; /* margin: 2px 0; Removed, gap handles it */
+            line-height: 1.5; text-align: center; min-height: 1.5em;
         }
-        input[type="checkbox"] {
-            cursor: pointer;
-            width: 17px;
-            height: 17px;
-            accent-color: #007bff;
+        #desconto-aplicado-info { font-weight: 500; }
+
+        .total-summary-box .checkbox-group {
+            display: flex; flex-direction: column; align-items: flex-start; gap: 4px; /* margin-bottom: 6px; Removed, gap handles it */
         }
-        .total-box {
-            font-size: clamp(20px, 5vw, 24px);
-            font-weight: bold;
-            color: #28a745;
-            text-align: center;
-            margin-bottom: 15px;
-            padding: 12px;
-            background-color: #eaf7ec;
-            border-radius: 8px;
+        .total-summary-box .checkbox-item {
+            font-size: 12px; display: flex; align-items: center; gap: 5px; cursor: pointer; padding: 2px 0; width: 100%;
+        }
+        .total-summary-box input[type="checkbox"] {
+            width: 16px; height: 16px; accent-color: var(--hospital-secondary); cursor: pointer; margin-right: 3px; flex-shrink: 0;
+        }
+        .total-summary-box .reset-button {
+            font-size: 12px; font-weight: bold; background-color: var(--hospital-danger); color: var(--hospital-text-on-dark);
+            border-radius: 5px; padding: 6px 10px; border: none; cursor: pointer;
+            transition: background-color 0.2s ease; width: 100%; text-align: center;
+            /* margin-top: auto; Removed */
+            /* margin-bottom: 4px; Removed, gap handles it */
+        }
+        .total-summary-box .reset-button:hover { background-color: #c82333; }
+
+        .total-summary-box .card-extra-buttons-container {
+            display: flex; gap: 6px; /* margin-top: 4px; Removed, gap handles it */
+            width: 100%;
+        }
+        .total-summary-box .card-extra-buttons-container button {
+            flex: 1; padding: 6px 4px; font-size: 11px; min-width: 0;
+        }
+
+        .bottom-section { /* Section below the main grid */
+            background: var(--hospital-card-background); padding: 10px 15px; margin: 10px; margin-top: 5px;
+            border-top: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: relative; /* Para garantir que esta seção fique acima do pseudo-elemento body::before */
+            z-index: 0;
         }
         .button-group {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 12px;
-            align-items: center;
+            display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; align-items: center;
+        }
+        .button-group:last-child { margin-bottom: 0; }
+
+        .size-filter-button { /* For Tudo, P, M, G, GG (geral, se houver fora do Sinkalm) */
+            background-color: var(--hospital-button-gray-bg); color: var(--hospital-button-gray-text);
+            border: 1px solid var(--hospital-button-gray-border); padding: 6px 12px; font-size: 13px; min-width: 45px;
+        }
+        .size-filter-button:hover {
+            background-color: var(--hospital-light); color: var(--hospital-primary); border-color: var(--hospital-secondary);
+        }
+        .size-filter-button.active {
+            background-color: var(--hospital-secondary); color: var(--hospital-text-on-dark);
+            border-color: var(--hospital-primary); font-weight: bold; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
         }
 
-        /* --- Estilos Específicos dos Botões --- */
-        .action-buttons button { background-color: #cfe2ff; border: 1px solid #b8daff; color: #004085; }
-        .action-buttons button:hover { background-color: #b8daff; }
-        .action-buttons button.active { background-color: #004085; color: #ffffff; border-color: #003066; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
-         .count-control-group { display: flex; align-items: center; gap: 5px; }
-         #btn-10x10 { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-         #btn-10x10:hover { background-color: #ffeeba; }
-         #btn-10x10-minus { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; width: 30px; height: 30px; padding: 0; font-size: 16px; font-weight: bold; }
-         #btn-10x10-minus:hover { background-color: #f5c6cb; }
-        .reset-button { font-size: 12px; font-weight: bold; background-color: #dc3545; color: white; border-radius: 5px; padding: 6px 12px; margin-left: auto; border: none; flex-shrink: 0; cursor: pointer; transition: background-color 0.2s ease; }
-        .reset-button:hover { background-color: #c82333; }
-        .extra-buttons button { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
-         .extra-buttons button:hover { background-color: #bee5eb; }
-        .extra-buttons button.active { background-color: #0c5460; color: #ffffff; border-color: #083a42; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
-        .info-buttons { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-        .info-buttons button { flex-grow: 1; background-color: #ffc107; color: #3b2a00; border: none; font-size: 13px; padding: 10px 8px; min-width: 100px; }
+        .extra-toggle-button {
+            background-color: var(--hospital-very-light); color: var(--hospital-primary); border: 1px solid var(--hospital-light);
+        }
+        .extra-toggle-button:hover { background-color: var(--hospital-light); }
+        .extra-toggle-button.active {
+            background-color: var(--hospital-secondary); color: var(--hospital-text-on-dark);
+            border-color: var(--hospital-primary); box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); font-weight: bold;
+        }
+
+        .info-buttons { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
+        .info-buttons button {
+            flex-grow: 1; background-color: var(--hospital-accent); color: var(--hospital-text-on-light);
+            border: none; font-size: 13px; padding: 10px 8px; min-width: 100px;
+        }
         .info-buttons button:hover { background-color: #e0a800; }
-         #anotacoesButton { background-color: #6c757d; color: white; }
-         #anotacoesButton:hover { background-color: #5a6268; }
-         #gessoInfoButton { background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; }
-         #gessoInfoButton:hover { background-color: #aeeaf9; }
+        #anotacoesButton { background-color: #6c757d; color: white; }
+        #anotacoesButton:hover { background-color: #5a6268; }
+        #gessoInfoButton {
+            background-color: var(--hospital-very-light); color: var(--hospital-primary); border: 1px solid var(--hospital-light);
+        }
+        #gessoInfoButton:hover { background-color: var(--hospital-light); }
 
-
-        /* --- Listas Ocultáveis e Anotações --- */
-        .toggle-list, #anotacoesBox { display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); margin-top: 10px; border: 1px solid #dee2e6; }
+        .toggle-list, #anotacoesBox {
+            display: none; background: #f8f9fa; padding: 15px; border-radius: 8px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05); margin-top: 10px; border: 1px solid #dee2e6;
+        }
         .toggle-list ul { list-style: none; padding: 0; margin: 0; }
         .toggle-list li { margin-bottom: 8px; font-size: 13px; color: #343a40; line-height: 1.5; }
         .toggle-list li:last-child { margin-bottom: 0; }
-        .toggle-list b { color: #0056b3; font-weight: 600; }
+        .toggle-list b { color: var(--hospital-primary); font-weight: 600; }
         .toggle-list .dosage { font-size: 11px; color: #6c757d; margin-left: 5px; }
-         .toggle-list h4 { margin-top: 10px; margin-bottom: 5px; font-size: 14px; color: #004085; border-bottom: 1px solid #cfe2ff; padding-bottom: 3px; }
-         .toggle-list h4:first-of-type { margin-top: 0; }
-         #receitasList li, #gessoInfoList li { margin-left: 10px; font-size: 12px; color: #495057; }
-         #gessoInfoList ul { padding-left: 20px; list-style: disc; margin-bottom: 10px; }
-         #gessoInfoList li { margin-bottom: 6px; }
-        #anotacoesArea { width: 100%; min-height: 100px; border: 1px solid #ced4da; border-radius: 4px; padding: 10px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 8px; }
-        .clear-anotacoes-button { background-color: #dc3545; color: white; border: none; padding: 6px 10px; font-size: 12px; font-weight: 500; cursor: pointer; border-radius: 5px; transition: background-color 0.2s ease; float: right; }
+        .toggle-list h4 {
+            margin-top: 10px; margin-bottom: 5px; font-size: 14px; color: var(--hospital-primary);
+            border-bottom: 1px solid var(--hospital-light); padding-bottom: 3px;
+        }
+        .toggle-list h4:first-of-type { margin-top: 0; }
+        #receitasList li, #gessoInfoList li { margin-left: 10px; font-size: 12px; color: #495057; }
+        #gessoInfoList ul { padding-left: 15px; list-style: disc; margin-bottom: 10px; margin-top: 4px; }
+        #gessoInfoList li { margin-bottom: 6px; }
+        #anotacoesArea {
+            width: 100%; min-height: 100px; border: 1px solid #ced4da; border-radius: 4px;
+            padding: 10px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 8px;
+        }
+        .clear-anotacoes-button {
+            background-color: var(--hospital-danger); color: white; border: none; padding: 6px 10px;
+            font-size: 12px; font-weight: 500; cursor: pointer; border-radius: 5px;
+            transition: background-color 0.2s ease; float: right;
+        }
         .clear-anotacoes-button:hover { background-color: #c82333; }
 
+        .inline-preset-box { /* Inside Sinkalm card */
+            background-color: #e9ecef; border: 1px solid #dee2e6; border-radius: 6px;
+            padding: 6px; /* Reduced padding */
+            display: flex; flex-direction: column; gap: 5px; /* Reduced gap */
+            align-items: stretch;
+        }
+        .inline-preset-row-1, .inline-preset-row-2 {
+            display: flex; flex-wrap: wrap; gap: 5px; /* Reduced gap */
+            justify-content: center; align-items: center;
+        }
+        .inline-preset-box button { flex-grow: 0; flex-shrink: 0; }
 
-        /* --- Mobile Adjustments --- */
-        @media (max-width: 600px) {
-            body { font-size: 13px; }
-            .container { padding: 5px; gap: 6px; }
-             .item { padding: 8px 10px; gap: 5px; }
-            .bottom-section { padding: 10px; margin: 5px; margin-top: 2px; }
-            .info-buttons { gap: 5px; }
-            .info-buttons button { min-width: 70px; padding: 8px 5px; font-size: 11px; }
-             .button-group { gap: 5px; }
-             .action-buttons button, .extra-buttons button { padding: 5px 8px; font-size: 11px; }
-             .item-name { font-size: 13px; min-width: 70px; line-height: 1.3; }
-             input[type="number"] { width: 40px; height: 28px; padding: 4px; font-size: 13px; }
-             .controls button { width: 28px; height: 28px; font-size: 14px; } /* +/- */
-             /* <<< MUDANÇA AQUI: Padding horizontal do botão Max aumentado no mobile >>> */
-             .max-button {
-                 width: auto;
-                 height: 28px;     /* Mantida da versão anterior */
-                 /* Padding: Vertical (6px mantido) Horizontal (aumentado para 12px) */
-                 padding: 6px 12px; /* Alterado de 6px 8px */
-                 font-size: 11px;
-             }
-            .total-box { padding: 10px; font-size: clamp(18px, 4vw, 22px); }
-             #btn-10x10 { font-size: 11px; }
-             #btn-10x10-minus { width: 28px; height: 28px; font-size: 14px; }
-             .toggle-list, #anotacoesBox { padding: 10px; }
-             .toggle-list li, #receitasList li, #gessoInfoList li { font-size: 11px; }
-             .toggle-list h4 { font-size: 13px; }
-             #anotacoesArea { font-size: 12px; min-height: 80px; }
+        /* MODIFICAÇÃO: Estilo para os botões "Tudo, P, M, G, GG" dentro do card Sinkalm */
+        .inline-preset-box .size-filter-button {
+            background-color: var(--hospital-very-light); /* Azul bem claro */
+            color: var(--hospital-primary); /* Azul escuro para contraste */
+            border: 1px solid var(--hospital-light); /* Borda azul clara */
+            padding: 6px 8px; /* Ajuste de padding se necessário, herdando o geral ou específico */
+            font-size: 11px; /* Ajuste de fonte se necessário */
+        }
+        .inline-preset-box .size-filter-button:hover {
+            background-color: var(--hospital-light); /* Azul claro no hover */
+            color: var(--hospital-text-on-dark); /* Texto branco para contraste */
+            border-color: var(--hospital-secondary);
+        }
+        .inline-preset-box .size-filter-button.active {
+            background-color: var(--hospital-secondary); /* Azul médio quando ativo (mantém o estilo original de .active) */
+            color: var(--hospital-text-on-dark); /* Texto branco (mantém o estilo original de .active) */
+            border-color: var(--hospital-primary); /* Borda azul escura (mantém o estilo original de .active) */
+            font-weight: bold;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
         }
 
+
+        .inline-preset-row-2 button:nth-child(1) { /* 10x10 button */
+            background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 6px 8px; /* Reduced padding */
+        }
+        .inline-preset-row-2 button:nth-child(1):hover { background-color: #ffeeba; }
+        .x10-counter { font-size: 0.85em; margin-left: 5px; color: #6c757d; font-weight: normal; display: inline-block; }
+
+        .inline-preset-row-2 button:nth-child(2) { /* Minus button for 10x10 */
+            background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+            width: 30px; height: 30px; /* Slightly smaller */
+            padding: 0; font-size: 16px; /* Slightly smaller */
+            font-weight: bold;
+        }
+        .inline-preset-row-2 button:nth-child(2):hover { background-color: #f5c6cb; }
+
+        .scroll-down-button-inline {
+            background-color: var(--hospital-success); color: white; border: 1px solid #1e7e34;
+            width: 30px; height: 30px; /* Slightly smaller */
+            padding: 0; font-size: 18px; /* Slightly smaller */
+            line-height: 30px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-left: 2px;
+        }
+        .scroll-down-button-inline:hover { background-color: #218838; border-color: #1c6c2e; }
+        .scroll-down-button-inline:active { background-color: #1e7e34; transform: scale(0.95); }
+
+
+        @media (max-width: 992px) {
+            .container { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .site-header img { height: 28px; margin-right: 10px;}
+            .site-header h1 { font-size: 1.15em; }
+            .container { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
+
+            .item, .total-summary-box, .item-wrapper { min-height: 165px; } /* Reduced min-height */
+            .item-wrapper { padding: 6px; } /* Ensure wrapper padding doesn't add too much */
+            .item-wrapper > .item { padding: 4px 0 0 0; } /* Reduce padding inside wrapped item */
+
+
+            .inline-preset-box { padding: 5px; gap: 4px; }
+            /* Os estilos específicos para .inline-preset-box .size-filter-button acima já cuidam da cor.
+               Abaixo, mantemos os ajustes de tamanho responsivos para esses botões. */
+            .inline-preset-box .size-filter-button {
+                 padding: 5px 4px; font-size: 10px; min-width: 30px; flex-grow: 1; flex-basis: 0; height: 28px;
+            }
+            .inline-preset-row-1 { gap: 4px; flex-wrap: nowrap; } /* Mantido para estrutura */
+
+            .inline-preset-row-2 button:nth-child(2),
+            .scroll-down-button-inline { width: 30px; height: 30px; font-size: 15px; line-height: 30px; }
+            .scroll-down-button-inline { font-size: 17px; }
+
+
+            .decrement-max-button { width: 22px; height: 22px; font-size: 12px;}
+            .max-button { padding: 4px 8px; height: 22px; font-size: 9px; }
+            .total-summary-box { gap: 5px; }
+            .total-summary-box .total-breakdown { font-size: 10px; padding: 3px 0; /* margin: 1px 0; */}
+            .total-summary-box .checkbox-group { gap: 3px; /* margin-bottom: 4px; */ }
+            .total-summary-box .reset-button { /* margin-top: 3px; margin-bottom: 3px; */ font-size:11px; padding: 5px 8px;}
+            .total-summary-box .card-extra-buttons-container { /* margin-top: 3px; */ }
+            .total-summary-box .card-extra-buttons-container button { font-size: 10px; padding: 5px 3px; }
+
+            .item-image { max-width: 65px; margin-top: 3px; margin-bottom: 3px;} /* Slightly larger image, balanced margins */
+            .item-name {font-size: 10px;}
+        }
+
+        @media (max-width: 480px) {
+            .site-header {
+                padding: 8px 10px; /* Adjust padding */
+            }
+            .site-header img { height: 24px; margin-right: 8px; } /* Smaller logo */
+            .site-header h1 { font-size: 0.95em; } /* Smaller title */
+
+            body { font-size: 12px; } /* Base font smaller */
+            .container { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 8px; }
+
+            .item, .total-summary-box { min-height: 150px; padding: 5px; gap: 2px; }
+            .item-wrapper { min-height: auto; padding: 5px; gap: 3px; }
+            .item-wrapper > .item { padding: 0; gap: 2px;}
+
+
+            .total-summary-box { padding: 6px; gap: 4px; }
+            .total-summary-box .total-box-main { font-size: 15px; padding: 5px 3px; }
+            .total-summary-box .total-breakdown { font-size: 9px; padding: 2px 0px; /* margin: 1px 0; */}
+            .total-summary-box .checkbox-group { gap: 2px; /* margin-bottom: 3px; */}
+            .total-summary-box .checkbox-item { font-size: 10px; gap: 3px;}
+            .total-summary-box input[type="checkbox"] { width: 14px; height: 14px; margin-right: 2px;}
+            .total-summary-box .reset-button { font-size: 10px; padding: 5px 6px; /* margin-top: auto; margin-bottom: 2px; */}
+            .total-summary-box .card-extra-buttons-container { gap: 3px; /* margin-top: 2px; */ }
+            .total-summary-box .card-extra-buttons-container button { font-size: 9px; padding: 4px 2px; min-height: 26px;}
+
+
+            .item-name { font-size: 9px; line-height: 1.1; margin-bottom: 1px; margin-right: 2px; }
+            .item-top { margin-bottom: 2px; }
+            .decrement-max-button { width: 18px; height: 18px; font-size: 9px;}
+            .max-button { height: 20px; padding: 2px 5px; font-size: 8px; line-height: 1; }
+            .item-image { width: 55%; max-width: 55px; margin-top: 2px; margin-bottom: 2px; } /* Increased size, balanced margins */
+            .controls { gap: 1px; }
+            input[type="number"] { width: 30px; height: 22px; font-size: 10px; padding: 2px; }
+            .controls button { width: 22px; height: 22px; font-size: 12px; }
+
+            .inline-preset-box { padding: 4px; gap: 3px; }
+            .inline-preset-row-1 { gap: 2px; flex-wrap: nowrap; }
+            .inline-preset-row-2 { gap: 4px; }
+
+            /* Os estilos específicos para .inline-preset-box .size-filter-button acima já cuidam da cor.
+               Abaixo, mantemos os ajustes de tamanho responsivos para esses botões. */
+            .inline-preset-box .size-filter-button {
+                 padding: 3px 1px; font-size: 9px; min-width: auto;
+                 flex-grow: 1; flex-basis: 0; line-height: 1.1; height: 26px;
+            }
+            .inline-preset-box button { /* Outros botões dentro do inline-preset-box, se houver */
+                 font-size: 9px; padding: 4px 6px; min-height: 28px;
+            }
+             .inline-preset-row-2 button:nth-child(1) { /* 10x10 button */
+                 padding: 4px 6px;
+            }
+            .inline-preset-row-2 button:nth-child(2), /* Minus for 10x10 */
+            .scroll-down-button-inline { width: 28px; height: 28px; font-size: 13px; line-height: 28px; }
+            .scroll-down-button-inline { font-size: 15px; }
+
+            .bottom-section { padding: 6px 8px; margin: 5px; }
+            .info-buttons { gap: 4px; margin-top: 6px; }
+            .info-buttons button { min-width: 50px; padding: 6px 3px; font-size: 9px; }
+            .button-group { gap: 4px; margin-bottom: 6px; }
+            .extra-toggle-button { padding: 3px 5px; font-size: 9px; min-height: 24px; }
+            .toggle-list, #anotacoesBox { padding: 8px; margin-top: 6px; }
+            .toggle-list li, #receitasList li, #gessoInfoList li { font-size: 10px; }
+            .toggle-list h4 { font-size: 11px; }
+            #anotacoesArea { font-size: 11px; min-height: 60px; }
+        }
     </style>
 </head>
 <body>
-    <div class="container" id="items"></div> <div class="bottom-section">
-        <div class="checkbox-group">
-            <label class="checkbox-item">
-                <input type="checkbox" id="atendimentoCheckbox" /> Atendimento (R$ 1k)
-            </label>
-            <label class="checkbox-item">
-                <input type="checkbox" id="pmArcanjoCheckbox" /> PM/Arcanjos
-            </label>
-            <label class="checkbox-item">
-                <input type="checkbox" id="cnpjCheckbox" /> CNPJ
-            </label>
-            <button class="reset-button" onclick="resetar()" aria-label="Resetar Tudo">Resetar</button>
+    <header class="site-header">
+        <img src="Logo Hospital Santa Marcelina.png" alt="Logo Hospital Santa Marcelina"> <h1>Hospital Santa Marcelina - Calculadora</h1>
+    </header>
+
+    <div class="container" id="items">
         </div>
 
-        <div class="total-box">
-            Total: R$ <span id="total">0.00</span>
-        </div>
-
-        <div class="button-group action-buttons" id="presetButtonsContainer">
-            <button data-preset="TUDO">TUDO</button>
-            <button data-preset="P">P</button>
-            <button data-preset="M">M</button>
-            <button data-preset="G">G</button>
-            <button data-preset="GG">GG</button>
-            <div class="count-control-group">
-                 <button id="btn-10x10" onclick="add10x10()">10x10 (<span id="x10count">0x</span>)</button>
-                 <button id="btn-10x10-minus" onclick="remove10x10()" aria-label="Remover 10x10">-</button>
-            </div>
-        </div>
-
+    <div class="bottom-section">
         <div class="button-group extra-buttons" id="extraButtonsContainer">
-             <button data-name="Raio-X" data-value="1600">Raio-X</button>
-            <button data-name="Gesso Extra" data-value="1600">Gesso</button>
-            <button data-name="Queimadura" data-value="1600">Queimadura</button>
-            <button data-name="Resgate Norte" data-value="1500">Resgate Norte</button>
-            <button data-name="Exames" data-value="3000">Exames</button>
-            <button data-name="Ressonância" data-value="5000">Ressonância</button>
+            <button class="extra-toggle-button" data-name="Resgate Norte" data-value="1500" onclick="toggleExtra(this)">Resgate Norte</button>
+            <button class="extra-toggle-button" data-name="Exames" data-value="3000" onclick="toggleExtra(this)">Exames</button>
+            <button class="extra-toggle-button" data-name="Ressonância" data-value="5000" onclick="toggleExtra(this)">Ressonância</button>
         </div>
 
-        <div class="info-buttons">
-             <button id="dipironaButton" onclick="toggleDipironaList()">S/Dipirona</button>
+        <div class="button-group info-buttons">
+            <button id="dipironaButton" onclick="toggleDipironaList()">S/Dipirona</button>
             <button id="anotacoesButton" onclick="toggleAnotacoes()">Anotações</button>
             <button id="receitasButton" onclick="toggleReceitasList()">Receitas</button>
-            <button id="gessoInfoButton" onclick="toggleGessoInfoList()">Gesso</button>
+            <button id="gessoInfoButton" onclick="toggleGessoInfoList()">Gesso Info</button>
         </div>
 
         <div class="toggle-list" id="dipironaList">
-             <ul>
-                 <li><b>Ibuprofeno</b> <span class="dosage">(Ex: 400mg ou 600mg)</span> (anti-inflamatório)</li>
-                 <li><b>Cetoprofeno</b> <span class="dosage">(Ex: 50mg ou 100mg)</span> (anti-inflamatório)</li>
-                 <li><b>Paracetamol</b> <span class="dosage">(Ex: 500mg ou 750mg)</span> (analgésico, antitérmico)</li>
-                 <li><b>Diclofenaco</b> <span class="dosage">(Ex: 50mg)</span> (anti-inflamatório, dor muscular)</li>
-                 <li><b>Flurbiprofeno</b> <span class="dosage">(Ex: 50mg ou 100mg)</span> (anti-inflamatório, dor muscular)</li>
-                 <li><b>Clorfeniramina</b> <span class="dosage">(Ex: 4mg)</span> (antialérgico)</li>
-             </ul>
+            <ul>
+                <li><b>Ibuprofeno</b> <span class="dosage">(Ex: 400mg ou 600mg)</span> (anti-inflamatório)</li>
+                <li><b>Cetoprofeno</b> <span class="dosage">(Ex: 50mg ou 100mg)</span> (anti-inflamatório)</li>
+                <li><b>Paracetamol</b> <span class="dosage">(Ex: 500mg ou 750mg)</span> (analgésico, antitérmico)</li>
+                <li><b>Diclofenaco</b> <span class="dosage">(Ex: 50mg)</span> (anti-inflamatório, dor muscular)</li>
+                <li><b>Flurbiprofeno</b> <span class="dosage">(Ex: 50mg ou 100mg)</span> (anti-inflamatório, dor muscular)</li>
+                <li><b>Clorfeniramina</b> <span class="dosage">(Ex: 4mg)</span> (antialérgico)</li>
+            </ul>
         </div>
-         <div id="anotacoesBox">
-             <textarea id="anotacoesArea" placeholder="Digite suas anotações aqui..."></textarea>
-             <button id="clearAnotacoesButton" class="clear-anotacoes-button">Apagar Tudo</button>
-         </div>
+        <div id="anotacoesBox">
+            <textarea id="anotacoesArea" placeholder="Digite suas anotações aqui..."></textarea>
+            <button id="clearAnotacoesButton" class="clear-anotacoes-button">Apagar Tudo</button>
+        </div>
         <div class="toggle-list" id="receitasList">
-             <h4>Receita - Panqueca</h4> <ul> <li>6x Trigos</li> <li>2x Carnes</li> </ul>
-             <h4>Receita - Sanduíche</h4> <ul> <li>3x Tomates</li> <li>3x Trigos</li> <li>2x Frangos</li> </ul>
-             <h4>Receita - Suco</h4> <ul> <li>6x Laranjas ou Morangos</li> <li>2x Garrafas de Água</li> </ul>
-             <h4>Receita - Café com Leite</h4> <ul> <li>6x Grãos de Café</li> <li>2x Garrafas de Leite</li> </ul>
+            <h4>Receita - Panqueca</h4> <ul> <li>6x Trigos</li> <li>2x Carnes</li> </ul>
+            <h4>Receita - Sanduíche</h4> <ul> <li>3x Tomates</li> <li>3x Trigos</li> <li>2x Frangos</li> </ul>
+            <h4>Receita - Suco</h4> <ul> <li>6x Laranjas ou Morangos</li> <li>2x Garrafas de Água</li> </ul>
+            <h4>Receita - Café com Leite</h4> <ul> <li>6x Grãos de Café</li> <li>2x Garrafas de Leite</li> </ul>
         </div>
-         <div class="toggle-list" id="gessoInfoList">
-             <h4>Masculino:</h4>
-             <ul>
-                 <li><b>Braço Esquerdo:</b> Camisa 223</li>
-                 <li><b>Braço Direito:</b> Colete 64</li>
-                 <li><b>Perna Esquerda:</b> Adesivo 245</li>
-                 <li><b>Perna Direita:</b> Adesivo 246</li>
-                 <li><b>Parte inferior:</b> Calça 56</li>
-                 <li><b>Tronco:</b> Jaqueta 649</li>
-             </ul>
-             <h4>Feminino:</h4>
-             <ul>
-                 <li><b>Braço Esquerdo:</b> Colete 64</li>
-                 <li><b>Braço Direito:</b> Camisa 269</li>
-                 <li><b>Perna Esquerda:</b> Adesivo 261</li>
-                 <li><b>Perna Direita:</b> Adesivo 262 (quando só a perna esquerda estiver fraturada)</li>
-                 <li><b>Perna Direita:</b> sapato 166</li>
-                 <li><b>Parte inferior:</b> Calça 57</li>
-                 <li><b>Tronco:</b> Jaqueta 724</li>
-             </ul>
-         </div>
+        <div class="toggle-list" id="gessoInfoList">
+            <h4>Masculino:</h4>
+            <ul>
+                <li><b>Braço Esquerdo:</b> Camisa 223</li>
+                <li><b>Braço Direito:</b> Colete 64</li>
+                <li><b>Perna Esquerda:</b> Adesivo 245</li>
+                <li><b>Perna Direita:</b> Adesivo 246</li>
+                <li><b>Parte inferior:</b> Calça 56</li>
+                <li><b>Tronco:</b> Jaqueta 649</li>
+            </ul>
+            <h4>Feminino:</h4>
+            <ul>
+                <li><b>Braço Esquerdo:</b> Colete 64</li>
+                <li><b>Braço Direito:</b> Camisa 269</li>
+                <li><b>Perna Esquerda:</b> Adesivo 261</li>
+                <li><b>Perna Direita:</b> Adesivo 262 (quando só a perna esquerda estiver fraturada)</li>
+                <li><b>Perna Direita:</b> sapato 166</li>
+                <li><b>Parte inferior:</b> Calça 57</li>
+                <li><b>Tronco:</b> Jaqueta 724</li>
+            </ul>
+        </div>
     </div>
 
     <script>
-        // --- Configuração Inicial ---
         const produtosBase = [
-            { nome: 'Adrenalina', precoBase: 8000, precoCNPJ: 6500, precoPMArcanjo: 7000, maximo: 3 },
-            { nome: 'Medkit', precoBase: 1500, precoCNPJ: 1000, precoPMArcanjo: 1000, maximo: 2 },
-            { nome: 'Atadura', precoBase: 200, precoCNPJ: 100, precoPMArcanjo: 100, maximo: 10 },
-            { nome: 'Bandagem', precoBase: 300, precoCNPJ: 250, precoPMArcanjo: 300, maximo: 5 },
-            { nome: 'Analgésico', precoBase: 400, precoCNPJ: 350, precoPMArcanjo: 250, maximo: 10 },
-            { nome: 'Sinkalm', precoBase: 500, precoCNPJ: 300, precoPMArcanjo: 400, maximo: 5 },
-            { nome: 'Ritmoneury', precoBase: 500, precoCNPJ: null, precoPMArcanjo: null, maximo: 5 },
+            { nome: 'Adrenalina', precoBase: 8000, precoCNPJ: 6500, precoPMArcanjo: 7000, maximo: 3, imagem: 'adrenalina.png' },
+            { nome: 'Analgésico', precoBase: 400,  precoCNPJ: 350, precoPMArcanjo: 250, maximo: 10, imagem: 'analgesico.png' },
+            { nome: 'Atadura',     precoBase: 200,  precoCNPJ: 100, precoPMArcanjo: 100, maximo: 10, imagem: 'atadura.png' },
+            { nome: 'Bandagem',   precoBase: 300,  precoCNPJ: 250, precoPMArcanjo: 300, maximo: 5,  imagem: 'bandagem.png' },
+            { nome: 'Medkit',     precoBase: 1500, precoCNPJ: 1000, precoPMArcanjo: 1000, maximo: 2,  imagem: 'medkit.png' },
+            { nome: 'Ritmoneury', precoBase: 500,  precoCNPJ: null, precoPMArcanjo: null, maximo: 5,  imagem: 'ritmoneury.png' },
+            { nome: 'Sinkalm',    precoBase: 500,  precoCNPJ: 300, precoPMArcanjo: 400, maximo: 5,  imagem: 'sinkalmy.png' },
         ];
 
-        // Estado da aplicação
         const quantidades = {};
         const extraItemsState = {};
         let x10count = 0;
-        let activePreset = null;
 
-        // Referências aos elementos do DOM
+        const ABSOLUTE_ITEM_CAP = 99;
+
         const itemsContainer = document.getElementById('items');
-        const totalElement = document.getElementById('total');
-        const atendimentoCheckbox = document.getElementById('atendimentoCheckbox');
-        const cnpjCheckbox = document.getElementById('cnpjCheckbox');
-        const pmArcanjoCheckbox = document.getElementById('pmArcanjoCheckbox');
-        const x10Display = document.getElementById('x10count');
         const dipironaList = document.getElementById('dipironaList');
         const receitasList = document.getElementById('receitasList');
         const anotacoesBox = document.getElementById('anotacoesBox');
         const anotacoesArea = document.getElementById('anotacoesArea');
         const clearAnotacoesButton = document.getElementById('clearAnotacoesButton');
-        const extraButtonsContainer = document.getElementById('extraButtonsContainer');
-        const presetButtonsContainer = document.getElementById('presetButtonsContainer');
         const gessoInfoList = document.getElementById('gessoInfoList');
 
-        // --- Funções de Cálculo e Atualização ---
+        let totalValueSpan, descontoAplicadoSpan;
+        let atendimentoCheckbox, pmArcanjoCheckbox, cnpjCheckbox, resetButtonElement;
+
+        let inactivityTimer;
+        const INACTIVITY_TIMEOUT = 30000; // 30 segundos
+
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                resetar();
+            }, INACTIVITY_TIMEOUT);
+        }
+
         function getCurrentPrice(produto) {
-            if (cnpjCheckbox.checked && produto.precoCNPJ !== null) { return produto.precoCNPJ; }
-            else if (pmArcanjoCheckbox.checked && produto.precoPMArcanjo !== null) { return produto.precoPMArcanjo; }
+            const isCnpjChecked = cnpjCheckbox && cnpjCheckbox.checked;
+            const isPmArcanjoChecked = pmArcanjoCheckbox && pmArcanjoCheckbox.checked;
+            if (isCnpjChecked && produto.precoCNPJ !== null) { return produto.precoCNPJ; }
+            if (isPmArcanjoChecked && produto.precoPMArcanjo !== null) { return produto.precoPMArcanjo; }
             return produto.precoBase;
-         }
+        }
+
         function updateItemPriceDisplay() {
-           const itemElements = itemsContainer.querySelectorAll('.item');
-           itemElements.forEach((itemElement, index) => {
-               const produto = produtosBase[index];
-               const nameElement = itemElement.querySelector('.item-name');
-               if (nameElement) {
-                   const currentPrice = getCurrentPrice(produto);
-                   nameElement.textContent = `${produto.nome} (R$${currentPrice.toLocaleString('pt-BR')})`;
-               }
-           });
-         }
+            const itemElements = itemsContainer.querySelectorAll('.item');
+            itemElements.forEach((itemElement) => {
+                const index = parseInt(itemElement.dataset.index, 10);
+                if (isNaN(index) || index >= produtosBase.length) return;
+                const produto = produtosBase[index];
+                const nameElement = itemElement.querySelector('.item-name');
+                if (nameElement && produto) {
+                    const currentPrice = getCurrentPrice(produto);
+                    nameElement.textContent = `${produto.nome} (R$${currentPrice.toLocaleString('pt-BR')})`;
+                }
+            });
+        }
+
+        function updateX10Display() {
+            const sinkalmWrapper = document.querySelector('.item-wrapper[data-contains-sinkalm="true"]');
+            const inlineSpan = sinkalmWrapper?.querySelector('#inline-x10count');
+            if (inlineSpan) {
+                inlineSpan.textContent = `(${x10count}x)`;
+            }
+        }
+
         function atualizarTotal() {
             let subtotalItens = 0;
             produtosBase.forEach((produto, index) => {
@@ -375,183 +650,429 @@
                 const precoUnit = getCurrentPrice(produto);
                 subtotalItens += precoUnit * qtd;
             });
+
             let totalExtras = 0;
             for (const name in extraItemsState) {
-                if (extraItemsState[name].active) { totalExtras += extraItemsState[name].value; }
+                if (extraItemsState[name]?.active) {
+                    totalExtras += extraItemsState[name].value;
+                }
             }
-            const valorAtendimento = atendimentoCheckbox.checked ? 1000 : 0;
+
+            const isAtendimentoChecked = atendimentoCheckbox && atendimentoCheckbox.checked;
+            const valorAtendimento = isAtendimentoChecked ? 1000 : 0;
             const valor10x10Total = x10count * 5000;
             const totalFinal = subtotalItens + totalExtras + valorAtendimento + valor10x10Total;
-            totalElement.textContent = totalFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            if (totalValueSpan) totalValueSpan.textContent = totalFinal.toLocaleString('pt-BR');
+
+            if (descontoAplicadoSpan) {
+                if (cnpjCheckbox && cnpjCheckbox.checked) {
+                    descontoAplicadoSpan.textContent = "Desconto CNPJ Ativado";
+                    descontoAplicadoSpan.style.display = 'block';
+                    descontoAplicadoSpan.style.color = 'var(--hospital-success)';
+                } else if (pmArcanjoCheckbox && pmArcanjoCheckbox.checked) {
+                    descontoAplicadoSpan.textContent = "Desconto PM/Arcanjo Ativado";
+                    descontoAplicadoSpan.style.display = 'block';
+                    descontoAplicadoSpan.style.color = 'var(--hospital-secondary)';
+                } else {
+                    descontoAplicadoSpan.style.display = 'none';
+                }
+            }
+            updateItemPriceDisplay();
         }
 
-        // --- Funções de Interação (Toggles e Botões) ---
         function closeOtherPanels(currentPanelId) {
-            const panels = [dipironaList, receitasList, anotacoesBox, gessoInfoList];
-            panels.forEach(panel => {
-                if (panel && panel.id !== currentPanelId) {
-                    panel.style.display = 'none';
-                }
+            [dipironaList, receitasList, anotacoesBox, gessoInfoList].forEach(panel => {
+                if (panel && panel.id !== currentPanelId) panel.style.display = 'none';
             });
         }
-        function toggleDipironaList() { closeOtherPanels('dipironaList'); const display = dipironaList.style.display; dipironaList.style.display = display === 'none' || display === '' ? 'block' : 'none'; }
-        function toggleReceitasList() { closeOtherPanels('receitasList'); const display = receitasList.style.display; receitasList.style.display = display === 'none' || display === '' ? 'block' : 'none'; }
-        function toggleAnotacoes() { closeOtherPanels('anotacoesBox'); const display = anotacoesBox.style.display; anotacoesBox.style.display = display === 'none' || display === '' ? 'block' : 'none'; if (anotacoesBox.style.display === 'block') { anotacoesArea.focus(); } }
-        function toggleGessoInfoList() { closeOtherPanels('gessoInfoList'); const display = gessoInfoList.style.display; gessoInfoList.style.display = display === 'none' || display === '' ? 'block' : 'none'; }
+        function toggleDipironaList() { closeOtherPanels('dipironaList'); dipironaList.style.display = dipironaList.style.display === 'block' ? 'none' : 'block'; resetInactivityTimer(); }
+        function toggleReceitasList() { closeOtherPanels('receitasList'); receitasList.style.display = receitasList.style.display === 'block' ? 'none' : 'block'; resetInactivityTimer(); }
+        function toggleAnotacoes() { closeOtherPanels('anotacoesBox'); anotacoesBox.style.display = anotacoesBox.style.display === 'block' ? 'none' : 'block'; resetInactivityTimer(); }
+        function toggleGessoInfoList() { closeOtherPanels('gessoInfoList'); gessoInfoList.style.display = gessoInfoList.style.display === 'block' ? 'none' : 'block'; resetInactivityTimer(); }
 
-        function toggleExtra(buttonElement) {
-           const name = buttonElement.dataset.name;
-           const value = parseInt(buttonElement.dataset.value, 10);
-           if (!extraItemsState[name]) { extraItemsState[name] = { value: value, active: false }; }
-           extraItemsState[name].active = !extraItemsState[name].active;
-           buttonElement.classList.toggle('active', extraItemsState[name].active);
-           atualizarTotal();
-         }
-        function add10x10() { x10count++; x10Display.textContent = `${x10count}x`; atualizarTotal(); }
-        function remove10x10() { if (x10count > 0) { x10count--; x10Display.textContent = `${x10count}x`; atualizarTotal(); } }
 
-        function resetar() {
-            for (let i = 0; i < produtosBase.length; i++) {
-                quantidades[i] = 0;
-                const inputElement = itemsContainer.children[i]?.querySelector('input[type="number"]');
+        function clearAllMedicationQuantities() {
+            produtosBase.forEach((produto, index) => {
+                quantidades[index] = 0;
+                const itemElement = itemsContainer.querySelector(`.item[data-index="${index}"]`);
+                const inputElement = itemElement?.querySelector(`input[type="number"]`);
                 if (inputElement) inputElement.value = 0;
-            }
-            atendimentoCheckbox.checked = false; cnpjCheckbox.checked = false; pmArcanjoCheckbox.checked = false;
-            for (const name in extraItemsState) { extraItemsState[name].active = false; }
-            extraButtonsContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-            activePreset = null;
-            presetButtonsContainer.querySelectorAll('button[data-preset]').forEach(btn => btn.classList.remove('active'));
-            x10count = 0; x10Display.textContent = `${x10count}x`;
-            updateItemPriceDisplay();
-            atualizarTotal();
-            dipironaList.style.display = 'none'; receitasList.style.display = 'none'; anotacoesBox.style.display = 'none'; gessoInfoList.style.display = 'none';
+            });
+            x10count = 0;
+            updateX10Display();
         }
 
-        function handlePresetClick(tipo) {
-            const targetButton = presetButtonsContainer.querySelector(`button[data-preset="${tipo}"]`);
-            if (tipo === activePreset) {
-                resetar();
-            } else {
-                for (let i = 0; i < produtosBase.length; i++) {
-                    quantidades[i] = 0;
-                    const inputElement = itemsContainer.children[i]?.querySelector('input[type="number"]');
-                    if (inputElement) inputElement.value = 0;
-                }
-                atendimentoCheckbox.checked = false; cnpjCheckbox.checked = false; pmArcanjoCheckbox.checked = false;
-                x10count = 0; x10Display.textContent = `${x10count}x`;
-                if (activePreset) {
-                    const previousButton = presetButtonsContainer.querySelector(`button[data-preset="${activePreset}"]`);
-                    if (previousButton) previousButton.classList.remove('active');
-                }
-                switch (tipo) {
-                    case 'P':  setQuant('Atadura', 10); setQuant('Bandagem', 5); setQuant('Medkit', 2); break;
-                    case 'M':  setQuant('Atadura', 10); setQuant('Bandagem', 5); setQuant('Medkit', 2); setQuant('Analgésico', 10); break;
-                    case 'G':  setQuant('Atadura', 10); setQuant('Bandagem', 5); setQuant('Medkit', 2); setQuant('Analgésico', 10); setQuant('Adrenalina', 1); break;
-                    case 'GG': setQuant('Atadura', 10); setQuant('Bandagem', 5); setQuant('Medkit', 2); setQuant('Analgésico', 10); setQuant('Adrenalina', 3); break;
-                    case 'TUDO': produtosBase.forEach(prod => setQuant(prod.nome, prod.maximo)); break;
-                }
-                if(targetButton) targetButton.classList.add('active');
-                activePreset = tipo;
-                updateItemPriceDisplay();
-                atualizarTotal();
+        function setActiveSizeButton(targetButton, containerSelector = '.inline-preset-box') {
+            const controlsBox = targetButton.closest(containerSelector);
+            controlsBox?.querySelectorAll('.size-filter-button[data-size]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            targetButton.classList.add('active');
+            const tudoButton = controlsBox?.querySelector('.size-filter-button[data-size="Tudo"]');
+            if (targetButton !== tudoButton) {
+                tudoButton?.classList.remove('active');
             }
+        }
+
+        function aplicarPresetTudo(buttonElement) {
+            resetInactivityTimer();
+            const isActive = buttonElement.classList.contains('active');
+            const sinkalmControls = buttonElement.closest('.inline-preset-box');
+
+            if (isActive) {
+                buttonElement.classList.remove('active');
+                clearAllMedicationQuantities();
+            } else {
+                sinkalmControls?.querySelectorAll('.size-filter-button[data-size]').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                buttonElement.classList.add('active');
+                produtosBase.forEach(produto => {
+                    setQuant(produto.nome, getMaxUnitValue(produto.nome));
+                });
+            }
+            atualizarTotal();
+        }
+
+        function aplicarPresetP(buttonElement) {
+            resetInactivityTimer();
+            const isActive = buttonElement.classList.contains('active');
+            if (isActive) {
+                buttonElement.classList.remove('active');
+                clearAllMedicationQuantities();
+            } else {
+                if(buttonElement) setActiveSizeButton(buttonElement);
+                setQuant('Atadura', getMaxUnitValue('Atadura')); setQuant('Medkit', getMaxUnitValue('Medkit'));
+                setQuant('Bandagem', getMaxUnitValue('Bandagem')); setQuant('Analgésico', 0);
+                setQuant('Adrenalina', 0); setQuant('Sinkalm', 0); setQuant('Ritmoneury', 0);
+                x10count = 0; updateX10Display();
+            }
+            atualizarTotal();
+        }
+        function aplicarPresetM(buttonElement) {
+            resetInactivityTimer();
+            const isActive = buttonElement.classList.contains('active');
+            if (isActive) {
+                buttonElement.classList.remove('active');
+                clearAllMedicationQuantities();
+            } else {
+                if(buttonElement) setActiveSizeButton(buttonElement);
+                setQuant('Atadura', getMaxUnitValue('Atadura')); setQuant('Medkit', getMaxUnitValue('Medkit'));
+                setQuant('Bandagem', getMaxUnitValue('Bandagem')); setQuant('Analgésico', getMaxUnitValue('Analgésico'));
+                setQuant('Adrenalina', 0); setQuant('Sinkalm', 0); setQuant('Ritmoneury', 0);
+                x10count = 0; updateX10Display();
+            }
+            atualizarTotal();
+        }
+        function aplicarPresetG(buttonElement) {
+            resetInactivityTimer();
+            const isActive = buttonElement.classList.contains('active');
+            if (isActive) {
+                buttonElement.classList.remove('active');
+                clearAllMedicationQuantities();
+            } else {
+                if(buttonElement) setActiveSizeButton(buttonElement);
+                setQuant('Atadura', getMaxUnitValue('Atadura')); setQuant('Medkit', getMaxUnitValue('Medkit'));
+                setQuant('Bandagem', getMaxUnitValue('Bandagem')); setQuant('Analgésico', getMaxUnitValue('Analgésico'));
+                setQuant('Adrenalina', 1); setQuant('Sinkalm', 0); setQuant('Ritmoneury', 0);
+                x10count = 0; updateX10Display();
+            }
+            atualizarTotal();
+        }
+        function aplicarPresetGG(buttonElement) {
+            resetInactivityTimer();
+            const isActive = buttonElement.classList.contains('active');
+            if (isActive) {
+                buttonElement.classList.remove('active');
+                clearAllMedicationQuantities();
+            } else {
+                if(buttonElement) setActiveSizeButton(buttonElement);
+                setQuant('Atadura', getMaxUnitValue('Atadura')); setQuant('Medkit', getMaxUnitValue('Medkit'));
+                setQuant('Bandagem', getMaxUnitValue('Bandagem')); setQuant('Analgésico', getMaxUnitValue('Analgésico'));
+                setQuant('Adrenalina', getMaxUnitValue('Adrenalina')); setQuant('Sinkalm', 0); setQuant('Ritmoneury', 0);
+                x10count = 0; updateX10Display();
+            }
+            atualizarTotal();
+        }
+
+        function toggleExtra(buttonElement) {
+            resetInactivityTimer();
+            if (!buttonElement?.dataset.name || !buttonElement.dataset.value) return;
+            const name = buttonElement.dataset.name;
+            const value = parseInt(buttonElement.dataset.value, 10);
+            if (isNaN(value)) return;
+
+            if (!extraItemsState[name]) extraItemsState[name] = { value: value, active: false };
+            extraItemsState[name].active = !extraItemsState[name].active;
+            buttonElement.classList.toggle('active', extraItemsState[name].active);
+            atualizarTotal();
+        }
+
+        function add10x10() { x10count++; updateX10Display(); atualizarTotal(); resetInactivityTimer(); }
+        function remove10x10() { if (x10count > 0) { x10count--; updateX10Display(); atualizarTotal(); } resetInactivityTimer(); }
+
+        function resetar() {
+            clearTimeout(inactivityTimer);
+            clearAllMedicationQuantities();
+
+            if (atendimentoCheckbox) atendimentoCheckbox.checked = false;
+            if (cnpjCheckbox) cnpjCheckbox.checked = false;
+            if (pmArcanjoCheckbox) pmArcanjoCheckbox.checked = false;
+
+            Object.keys(extraItemsState).forEach(name => extraItemsState[name].active = false);
+            document.querySelectorAll('.extra-toggle-button.active').forEach(btn => btn.classList.remove('active'));
+            // This includes Raio-X, Gesso, Queimadura if they are active in summary card
+            document.querySelectorAll('.total-summary-box .extra-toggle-button.active').forEach(btn => btn.classList.remove('active'));
+
+
+            document.querySelectorAll('.item-wrapper[data-contains-sinkalm="true"] .size-filter-button.active').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            atualizarTotal();
+            [dipironaList, receitasList, anotacoesBox, gessoInfoList].forEach(panel => panel.style.display = 'none');
+            anotacoesArea.value = '';
+            localStorage.removeItem('anotacoesCalculadora');
+
+            const scrollButton = document.getElementById('scrollToggleButton');
+            if (scrollButton) scrollButton.innerHTML = '&#8595;';
         }
 
         function setQuant(nomeProduto, quantidade) {
             const index = produtosBase.findIndex(p => p.nome === nomeProduto);
             if (index !== -1) {
-                const qtdFinal = Math.min(quantidade, produtosBase[index].maximo);
-                quantidades[index] = qtdFinal;
-                const inputElement = itemsContainer.children[index]?.querySelector('input[type="number"]');
-                 if (inputElement) inputElement.value = qtdFinal;
+                quantidades[index] = Math.max(0, Math.min(quantidade, ABSOLUTE_ITEM_CAP));
+
+                const itemElement = itemsContainer.querySelector(`.item[data-index="${index}"]`);
+                const inputElement = itemElement?.querySelector(`input[type="number"]`);
+                if (inputElement) inputElement.value = quantidades[index];
             }
         }
 
-        function criarItem(produto, index) {
-           quantidades[index] = 0;
-           const itemDiv = document.createElement('div'); itemDiv.className = 'item';
-           const name = document.createElement('div'); name.className = 'item-name';
-           name.textContent = `${produto.nome} (R$${produto.precoBase.toLocaleString('pt-BR')})`;
-           const controls = document.createElement('div'); controls.className = 'controls';
+        function changeQuantity(index, delta) {
+            resetInactivityTimer();
+            const produto = produtosBase[index];
+            if (!produto) return;
+            const inputElement = itemsContainer.querySelector(`.item[data-index="${index}"] input[type="number"]`);
+            if (!inputElement) return;
 
-           const menos = document.createElement('button'); menos.textContent = '-'; menos.setAttribute('aria-label', `Diminuir ${produto.nome}`);
-           menos.addEventListener('click', () => {
-               let val = parseInt(input.value) || 0;
-               if (val > 0) {
-                   input.value = --val;
-                   quantidades[index] = val;
-                   atualizarTotal();
-                   activePreset=null;
-                   presetButtonsContainer.querySelectorAll('button[data-preset]').forEach(btn => btn.classList.remove('active'));
-                }
-            });
+            let currentQuantity = quantidades[index] || 0;
+            let newQuantity = currentQuantity + delta;
+            newQuantity = Math.max(0, Math.min(newQuantity, ABSOLUTE_ITEM_CAP));
 
-           const input = document.createElement('input'); input.type = 'number'; input.value = '0'; input.min = '0';
-           input.setAttribute('aria-label', `Quantidade de ${produto.nome}`);
-           input.addEventListener('input', () => {
-                let val = parseInt(input.value) || 0;
-                if (val < 0) { val = 0; input.value = val; }
-                quantidades[index] = val; // Valor digitado é armazenado sem limite
-                atualizarTotal();
-                activePreset = null;
-                presetButtonsContainer.querySelectorAll('button[data-preset]').forEach(btn => btn.classList.remove('active'));
-            });
-
-           const mais = document.createElement('button'); mais.textContent = '+'; mais.setAttribute('aria-label', `Aumentar ${produto.nome}`);
-           mais.addEventListener('click', () => {
-               let val = parseInt(input.value) || 0;
-               if (val < produto.maximo) {
-                   input.value = ++val;
-                   quantidades[index] = val;
-                   atualizarTotal();
-                   activePreset=null;
-                   presetButtonsContainer.querySelectorAll('button[data-preset]').forEach(btn => btn.classList.remove('active'));
-               }
-           });
-
-           const maxBtn = document.createElement('button'); maxBtn.className = 'max-button'; maxBtn.textContent = 'Máx'; maxBtn.setAttribute('aria-label', `Definir máximo para ${produto.nome}`);
-           maxBtn.addEventListener('click', () => {
-               input.value = produto.maximo;
-               quantidades[index] = produto.maximo;
-               atualizarTotal();
-               activePreset=null;
-               presetButtonsContainer.querySelectorAll('button[data-preset]').forEach(btn => btn.classList.remove('active'));
-           });
-
-           controls.appendChild(menos); controls.appendChild(input); controls.appendChild(mais); controls.appendChild(maxBtn);
-           itemDiv.appendChild(name); itemDiv.appendChild(controls);
-           itemsContainer.appendChild(itemDiv);
-         }
-
-
-        // --- Inicialização da Aplicação ---
-        function init() {
-            produtosBase.forEach((produto, index) => criarItem(produto, index));
-            atendimentoCheckbox.addEventListener('change', atualizarTotal);
-            cnpjCheckbox.addEventListener('change', () => { if (cnpjCheckbox.checked) pmArcanjoCheckbox.checked = false; updateItemPriceDisplay(); atualizarTotal(); });
-            pmArcanjoCheckbox.addEventListener('change', () => { if (pmArcanjoCheckbox.checked) cnpjCheckbox.checked = false; updateItemPriceDisplay(); atualizarTotal(); });
-
-            extraButtonsContainer.querySelectorAll('button[data-name]').forEach(button => {
-                const name = button.dataset.name;
-                const value = parseInt(button.dataset.value, 10);
-                if (name && !isNaN(value)) {
-                    extraItemsState[name] = { value: value, active: false };
-                     button.addEventListener('click', () => toggleExtra(button));
-                }
-            });
-
-             presetButtonsContainer.querySelectorAll('button[data-preset]').forEach(button => {
-                 button.addEventListener('click', () => handlePresetClick(button.dataset.preset));
-             });
-
-            if (clearAnotacoesButton && anotacoesArea) {
-                clearAnotacoesButton.addEventListener('click', () => { anotacoesArea.value = ''; });
-            }
+            quantidades[index] = newQuantity;
+            inputElement.value = newQuantity;
             atualizarTotal();
         }
 
-        document.addEventListener('DOMContentLoaded', init);
+        function handleDirectInput(index, inputElement) {
+            resetInactivityTimer();
+            const produto = produtosBase[index];
+            if (!produto) return;
+            let value = parseInt(inputElement.value, 10);
+            if (isNaN(value) || value < 0) value = 0;
+            value = Math.min(value, ABSOLUTE_ITEM_CAP);
+            inputElement.value = value;
+            quantidades[index] = value;
+            atualizarTotal();
+        }
 
+        function setMaxToUnit(index) {
+            resetInactivityTimer();
+            const produto = produtosBase[index];
+            if (!produto) return;
+
+            quantidades[index] = produto.maximo;
+            if (quantidades[index] > ABSOLUTE_ITEM_CAP) quantidades[index] = ABSOLUTE_ITEM_CAP;
+
+            const itemElement = itemsContainer.querySelector(`.item[data-index="${index}"]`);
+            const inputElement = itemElement?.querySelector(`input[type="number"]`);
+            if (inputElement) inputElement.value = quantidades[index];
+            atualizarTotal();
+        }
+
+        function addImageClickQuantity(index) {
+            resetInactivityTimer();
+            const produto = produtosBase[index];
+            if (!produto) return;
+
+            let currentQuantity = quantidades[index] || 0;
+            let newQuantity = currentQuantity + produto.maximo;
+            quantidades[index] = Math.min(newQuantity, ABSOLUTE_ITEM_CAP);
+
+            const itemElement = itemsContainer.querySelector(`.item[data-index="${index}"]`);
+            const inputElement = itemElement?.querySelector(`input[type="number"]`);
+            if (inputElement) inputElement.value = quantidades[index];
+            atualizarTotal();
+        }
+
+        function decrementMaxUnit(index) {
+            resetInactivityTimer();
+            const produto = produtosBase[index];
+            if (!produto) return;
+
+            let currentQuantity = quantidades[index] || 0;
+            let newQuantity = currentQuantity - produto.maximo;
+            quantidades[index] = Math.max(0, newQuantity);
+
+            const itemElement = itemsContainer.querySelector(`.item[data-index="${index}"]`);
+            const inputElement = itemElement?.querySelector(`input[type="number"]`);
+            if (inputElement) inputElement.value = quantidades[index];
+            atualizarTotal();
+        }
+
+        function getMaxUnitValue(nomeProduto) {
+            const produto = produtosBase.find(p => p.nome === nomeProduto);
+            return produto ? produto.maximo : 0;
+        }
+
+        function createSinkalmSpecificControlsBox() {
+            const box = document.createElement('div');
+            box.classList.add('inline-preset-box');
+            const sizeFilterRow = document.createElement('div');
+            sizeFilterRow.classList.add('inline-preset-row-1');
+            sizeFilterRow.innerHTML = `
+                <button class="size-filter-button" data-size="Tudo" onclick="aplicarPresetTudo(this)">Tudo</button>
+                <button class="size-filter-button" data-size="P" onclick="aplicarPresetP(this)">P</button>
+                <button class="size-filter-button" data-size="M" onclick="aplicarPresetM(this)">M</button>
+                <button class="size-filter-button" data-size="G" onclick="aplicarPresetG(this)">G</button>
+                <button class="size-filter-button" data-size="GG" onclick="aplicarPresetGG(this)">GG</button>
+            `;
+            box.appendChild(sizeFilterRow);
+            const actionsRow = document.createElement('div');
+            actionsRow.classList.add('inline-preset-row-2');
+            actionsRow.innerHTML = `
+                <button onclick="add10x10()">10x10 <span id="inline-x10count" class="x10-counter">(0x)</span></button>
+                <button onclick="remove10x10()">-</button>
+                <button id="scrollToggleButton" class="scroll-down-button-inline" onclick="togglePageScroll()">&#8595;</button>
+            `;
+            box.appendChild(actionsRow);
+            return box;
+        }
+
+        function togglePageScroll() {
+            resetInactivityTimer();
+            const threshold = 10;
+            const isAtBottom = (window.innerHeight + Math.ceil(window.scrollY)) >= (document.body.scrollHeight - threshold);
+            const scrollButton = document.getElementById('scrollToggleButton');
+
+            if (isAtBottom) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                if (scrollButton) scrollButton.innerHTML = '&#8595;';
+            } else {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                if (scrollButton) scrollButton.innerHTML = '&#8593;';
+            }
+        }
+
+        function criarInterface() {
+            itemsContainer.innerHTML = '';
+            produtosBase.forEach((produto, index) => {
+                const ehSinkalm = produto.nome === 'Sinkalm';
+                const itemDiv = document.createElement('div');
+                itemDiv.classList.add('item');
+                itemDiv.dataset.index = index;
+                const currentPrice = getCurrentPrice(produto);
+                itemDiv.innerHTML = `
+                    <div class="item-top">
+                        <span class="item-name">${produto.nome} (R$${currentPrice.toLocaleString('pt-BR')})</span>
+                        <div class="item-top-buttons">
+                            <button class="decrement-max-button" onclick="decrementMaxUnit(${index})">-</button>
+                            <button class="max-button" onclick="setMaxToUnit(${index})">MAX</button>
+                        </div>
+                    </div>
+                    <img class="item-image" src="${produto.imagem}" alt="${produto.nome}" onclick="addImageClickQuantity(${index})">
+                    <div class="controls">
+                        <button onclick="changeQuantity(${index}, -1)">-</button>
+                        <input type="number" value="0" min="0" max="${ABSOLUTE_ITEM_CAP}" onchange="handleDirectInput(${index}, this)" oninput="handleDirectInput(${index}, this)">
+                        <button onclick="changeQuantity(${index}, 1)">+</button>
+                    </div>
+                `;
+                if (ehSinkalm) {
+                    const itemWrapper = document.createElement('div');
+                    itemWrapper.classList.add('item-wrapper');
+                    itemWrapper.dataset.containsSinkalm = "true";
+                    itemWrapper.appendChild(itemDiv);
+                    itemWrapper.appendChild(createSinkalmSpecificControlsBox());
+                    itemsContainer.appendChild(itemWrapper);
+                } else {
+                    itemsContainer.appendChild(itemDiv);
+                }
+                quantidades[index] = 0;
+            });
+            createTotalSummaryBox();
+            atualizarTotal();
+        }
+
+        function createTotalSummaryBox() {
+            const summaryBox = document.createElement('div');
+            summaryBox.classList.add('total-summary-box');
+            summaryBox.innerHTML = `
+                <div class="total-box-main">
+                    <span>Total: R$</span>
+                    <span id="total-value">0</span>
+                </div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="atendimentoCheckbox"> + Atendimento (R$ 1000)
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="cnpjCheckbox"> Desconto CNPJ
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="pmArcanjoCheckbox"> Desconto PM/Arcanjo
+                    </label>
+                </div>
+                <button id="resetButton" class="reset-button">RESETAR TUDO</button>
+                <div class="card-extra-buttons-container">
+                    <button class="extra-toggle-button" data-name="Raio-X" data-value="1600" onclick="toggleExtra(this)">Raio-x</button>
+                    <button class="extra-toggle-button" data-name="Gesso" data-value="1600" onclick="toggleExtra(this)">Gesso</button>
+                    <button class="extra-toggle-button" data-name="Queimadura" data-value="1600" onclick="toggleExtra(this)">Queimadura</button>
+                </div>
+                <div class="total-breakdown">
+                    <div id="desconto-aplicado-info" style="display: none;"></div>
+                </div>
+            `;
+            itemsContainer.appendChild(summaryBox);
+
+            totalValueSpan = document.getElementById('total-value');
+            descontoAplicadoSpan = document.getElementById('desconto-aplicado-info');
+
+            atendimentoCheckbox = document.getElementById('atendimentoCheckbox');
+            cnpjCheckbox = document.getElementById('cnpjCheckbox');
+            pmArcanjoCheckbox = document.getElementById('pmArcanjoCheckbox');
+            resetButtonElement = document.getElementById('resetButton');
+
+            atendimentoCheckbox.addEventListener('change', () => { atualizarTotal(); resetInactivityTimer(); });
+            cnpjCheckbox.addEventListener('change', () => {
+                if (cnpjCheckbox.checked && pmArcanjoCheckbox.checked) pmArcanjoCheckbox.checked = false;
+                atualizarTotal();
+                resetInactivityTimer();
+            });
+            pmArcanjoCheckbox.addEventListener('change', () => {
+                if (pmArcanjoCheckbox.checked && cnpjCheckbox.checked) cnpjCheckbox.checked = false;
+                atualizarTotal();
+                resetInactivityTimer();
+            });
+            resetButtonElement.addEventListener('click', resetar);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            criarInterface();
+            const savedAnotacoes = localStorage.getItem('anotacoesCalculadora');
+            if (savedAnotacoes) anotacoesArea.value = savedAnotacoes;
+            anotacoesArea.addEventListener('input', () => {
+                localStorage.setItem('anotacoesCalculadora', anotacoesArea.value);
+                resetInactivityTimer();
+            });
+            clearAnotacoesButton.addEventListener('click', () => {
+                anotacoesArea.value = '';
+                localStorage.removeItem('anotacoesCalculadora');
+                resetInactivityTimer();
+            });
+            resetInactivityTimer();
+        });
     </script>
 </body>
 </html>
