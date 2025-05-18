@@ -604,7 +604,7 @@
         let atendimentoCheckbox, pmArcanjoCheckbox, cnpjCheckbox, resetButtonElement;
 
         let inactivityTimer;
-        const INACTIVITY_TIMEOUT = 30000; // 30 segundos
+        const INACTIVITY_TIMEOUT = 300000; // 5 minutos (300000 milissegundos)
 
         function resetInactivityTimer() {
             clearTimeout(inactivityTimer);
@@ -1071,7 +1071,7 @@
                 localStorage.removeItem('anotacoesCalculadora');
                 resetInactivityTimer();
             });
-            resetInactivityTimer();
+            resetInactivityTimer(); // Initialize the timer on load
         });
     </script>
 </body>
