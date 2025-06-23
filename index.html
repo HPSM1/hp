@@ -331,9 +331,9 @@
             border-bottom: 1px solid var(--hospital-light); padding-bottom: 3px;
         }
         .toggle-list h4:first-of-type { margin-top: 0; }
-        #receitasList li, #gessoInfoList li { margin-left: 10px; font-size: 12px; color: #495057; }
-        #gessoInfoList ul { padding-left: 15px; list-style: disc; margin-bottom: 10px; margin-top: 4px; }
-        #gessoInfoList li { margin-bottom: 6px; }
+        #duvidasFrequentesList li, #gessoInfoList li { margin-left: 10px; font-size: 12px; color: #495057; }
+        #gessoInfoList ul, #duvidasFrequentesList ul { padding-left: 15px; list-style: disc; margin-bottom: 10px; margin-top: 4px; }
+        #gessoInfoList li, #duvidasFrequentesList li { margin-bottom: 6px; }
         #anotacoesArea {
             width: 100%; min-height: 100px; border: 1px solid #ced4da; border-radius: 4px;
             padding: 10px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 8px;
@@ -419,7 +419,7 @@
 
             .inline-preset-box { padding: 5px; gap: 4px; }
             /* Os estilos específicos para .inline-preset-box .size-filter-button acima já cuidam da cor.
-               Abaixo, mantemos os ajustes de tamanho responsivos para esses botões. */
+             Abaixo, mantemos os ajustes de tamanho responsivos para esses botões. */
             .inline-preset-box .size-filter-button {
                  padding: 5px 4px; font-size: 10px; min-width: 30px; flex-grow: 1; flex-basis: 0; height: 28px;
             }
@@ -483,7 +483,7 @@
             .inline-preset-row-2 { gap: 4px; }
 
             /* Os estilos específicos para .inline-preset-box .size-filter-button acima já cuidam da cor.
-               Abaixo, mantemos os ajustes de tamanho responsivos para esses botões. */
+             Abaixo, mantemos os ajustes de tamanho responsivos para esses botões. */
             .inline-preset-box .size-filter-button {
                  padding: 3px 1px; font-size: 9px; min-width: auto;
                  flex-grow: 1; flex-basis: 0; line-height: 1.1; height: 26px;
@@ -504,7 +504,7 @@
             .button-group { gap: 4px; margin-bottom: 6px; }
             .extra-toggle-button { padding: 3px 5px; font-size: 9px; min-height: 24px; }
             .toggle-list, #anotacoesBox { padding: 8px; margin-top: 6px; }
-            .toggle-list li, #receitasList li, #gessoInfoList li { font-size: 10px; }
+            .toggle-list li, #duvidasFrequentesList li, #gessoInfoList li { font-size: 10px; }
             .toggle-list h4 { font-size: 11px; }
             #anotacoesArea { font-size: 11px; min-height: 60px; }
         }
@@ -516,7 +516,7 @@
     </header>
 
     <div class="container" id="items">
-        </div>
+    </div>
 
     <div class="bottom-section">
         <div class="button-group extra-buttons" id="extraButtonsContainer">
@@ -528,7 +528,7 @@
         <div class="button-group info-buttons">
             <button id="dipironaButton" onclick="toggleDipironaList()">S/Dipirona</button>
             <button id="anotacoesButton" onclick="toggleAnotacoes()">Anotações</button>
-            <button id="receitasButton" onclick="toggleReceitasList()">Receitas</button>
+            <button id="duvidasFrequentesButton" onclick="toggleDuvidasFrequentesList()">Dúvidas Frequentes</button>
             <button id="gessoInfoButton" onclick="toggleGessoInfoList()">Gesso Info</button>
         </div>
 
@@ -546,11 +546,15 @@
             <textarea id="anotacoesArea" placeholder="Digite suas anotações aqui..."></textarea>
             <button id="clearAnotacoesButton" class="clear-anotacoes-button">Apagar Tudo</button>
         </div>
-        <div class="toggle-list" id="receitasList">
-            <h4>Receita - Panqueca</h4> <ul> <li>6x Trigos</li> <li>2x Carnes</li> </ul>
-            <h4>Receita - Sanduíche</h4> <ul> <li>3x Tomates</li> <li>3x Trigos</li> <li>2x Frangos</li> </ul>
-            <h4>Receita - Suco</h4> <ul> <li>6x Laranjas ou Morangos</li> <li>2x Garrafas de Água</li> </ul>
-            <h4>Receita - Café com Leite</h4> <ul> <li>6x Grãos de Café</li> <li>2x Garrafas de Leite</li> </ul>
+        <div class="toggle-list" id="duvidasFrequentesList">
+            <ul>
+                <li>RÁDIO 192 (Esteja sempre conectado enquanto estiver em serviço)</li>
+                <li>Preço de deslocamento Sul (1000)</li>
+                <li>Preço de descolocamento Norte (1500)</li>
+                <li>Cobrar o tratamento apenas de presos no presídio</li>
+                <li>Não dê tratamento fora do hospital, apenas em ações grandes com a polícia (nunca para bandidos)</li>
+                <li>Em caso de atendimento ou coleta de sangue fora do Hospital, abra as portas da ambulância e peça para que as pessoas se sentem ali, e faça o procedimento.</li>
+            </ul>
         </div>
         <div class="toggle-list" id="gessoInfoList">
             <h4>Masculino:</h4>
@@ -577,31 +581,35 @@
 
     <script>
         const produtosBase = [
-            { nome: 'Adrenalina', precoBase: 8000, precoCNPJ: 6500, precoPMArcanjo: 7000, maximo: 3, imagem: 'adrenalina.png' },
-            { nome: 'Analgésico', precoBase: 400,  precoCNPJ: 350, precoPMArcanjo: 250, maximo: 10, imagem: 'analgesico.png' },
-            { nome: 'Atadura',     precoBase: 200,  precoCNPJ: 100, precoPMArcanjo: 100, maximo: 10, imagem: 'atadura.png' },
-            { nome: 'Bandagem',   precoBase: 300,  precoCNPJ: 250, precoPMArcanjo: 300, maximo: 5,  imagem: 'bandagem.png' },
-            { nome: 'Medkit',     precoBase: 1500, precoCNPJ: 1000, precoPMArcanjo: 1000, maximo: 2,  imagem: 'medkit.png' },
-            { nome: 'Ritmoneury', precoBase: 500,  precoCNPJ: null, precoPMArcanjo: null, maximo: 5,  imagem: 'ritmoneury.png' },
-            { nome: 'Sinkalm',    precoBase: 500,  precoCNPJ: 300, precoPMArcanjo: 400, maximo: 5,  imagem: 'sinkalmy.png' },
+            { nome: 'Adrenalina', precoBase: 12000, precoCNPJ: 9500, precoPMArcanjo: 9500, precoConvenio: 9500, maximo: 3, imagem: 'adrenalina.png' },
+            { nome: 'Analgésico', precoBase: 600,  precoCNPJ: 500, precoPMArcanjo: 500, precoConvenio: 500, maximo: 10, imagem: 'analgesico.png' },
+            { nome: 'Atadura',      precoBase: 300,  precoCNPJ: 250, precoPMArcanjo: 250, precoConvenio: 250, maximo: 10, imagem: 'atadura.png' },
+            { nome: 'Bandagem',    precoBase: 500,  precoCNPJ: 400, precoPMArcanjo: 400, precoConvenio: 400, maximo: 5,  imagem: 'bandagem.png' },
+            { nome: 'Medkit',      precoBase: 2500, precoCNPJ: 2000, precoPMArcanjo: 2000, precoConvenio: 2000, maximo: 2,  imagem: 'medkit.png' },
+            { nome: 'Ritmoneury', precoBase: 800,  precoCNPJ: 600, precoPMArcanjo: 600, precoConvenio: 600, maximo: 5,  imagem: 'ritmoneury.png' },
+            { nome: 'Sinkalm',     precoBase: 800,  precoCNPJ: 600, precoPMArcanjo: 600, precoConvenio: 600, maximo: 5,  imagem: 'sinkalmy.png' },
         ];
 
         const quantidades = {};
-        const extraItemsState = {};
+        const extraItemsState = {
+            "Raio-X": { value: 2500, active: false, precoConvenio: 2000 },
+            "Gesso": { value: 2500, active: false, precoConvenio: 2000 },
+            "Queimadura": { value: 1600, active: false }
+        };
         let x10count = 0;
 
         const ABSOLUTE_ITEM_CAP = 99;
 
         const itemsContainer = document.getElementById('items');
         const dipironaList = document.getElementById('dipironaList');
-        const receitasList = document.getElementById('receitasList');
+        const duvidasFrequentesList = document.getElementById('duvidasFrequentesList'); // Alterado
         const anotacoesBox = document.getElementById('anotacoesBox');
         const anotacoesArea = document.getElementById('anotacoesArea');
         const clearAnotacoesButton = document.getElementById('clearAnotacoesButton');
         const gessoInfoList = document.getElementById('gessoInfoList');
 
         let totalValueSpan, descontoAplicadoSpan;
-        let atendimentoCheckbox, pmArcanjoCheckbox, cnpjCheckbox, resetButtonElement;
+        let atendimentoCheckbox, pmArcanjoCheckbox, cnpjCheckbox, convenioCheckbox, resetButtonElement;
 
         let inactivityTimer;
         const INACTIVITY_TIMEOUT = 300000; // 5 minutos (300000 milissegundos)
@@ -616,6 +624,9 @@
         function getCurrentPrice(produto) {
             const isCnpjChecked = cnpjCheckbox && cnpjCheckbox.checked;
             const isPmArcanjoChecked = pmArcanjoCheckbox && pmArcanjoCheckbox.checked;
+            const isConvenioChecked = convenioCheckbox && convenioCheckbox.checked;
+
+            if (isConvenioChecked && produto.precoConvenio !== null) { return produto.precoConvenio; }
             if (isCnpjChecked && produto.precoCNPJ !== null) { return produto.precoCNPJ; }
             if (isPmArcanjoChecked && produto.precoPMArcanjo !== null) { return produto.precoPMArcanjo; }
             return produto.precoBase;
@@ -652,14 +663,23 @@
             });
 
             let totalExtras = 0;
+            const isConvenioChecked = convenioCheckbox && convenioCheckbox.checked;
             for (const name in extraItemsState) {
                 if (extraItemsState[name]?.active) {
-                    totalExtras += extraItemsState[name].value;
+                    if (isConvenioChecked && extraItemsState[name].precoConvenio !== undefined) {
+                        totalExtras += extraItemsState[name].precoConvenio;
+                    } else {
+                        totalExtras += extraItemsState[name].value;
+                    }
                 }
             }
 
-            const isAtendimentoChecked = atendimentoCheckbox && atendimentoCheckbox.checked;
-            const valorAtendimento = isAtendimentoChecked ? 1000 : 0;
+            const valorAtendimentoBase = 2000;
+            const valorAtendimentoConvenio = 1500;
+            const valorAtendimento = (atendimentoCheckbox && atendimentoCheckbox.checked)
+                                     ? (isConvenioChecked ? valorAtendimentoConvenio : valorAtendimentoBase)
+                                     : 0;
+
             const valor10x10Total = x10count * 5000;
             const totalFinal = subtotalItens + totalExtras + valorAtendimento + valor10x10Total;
 
@@ -674,7 +694,12 @@
                     descontoAplicadoSpan.textContent = "Desconto PM/Arcanjo Ativado";
                     descontoAplicadoSpan.style.display = 'block';
                     descontoAplicadoSpan.style.color = 'var(--hospital-secondary)';
-                } else {
+                } else if (convenioCheckbox && convenioCheckbox.checked) {
+                    descontoAplicadoSpan.textContent = "Desconto Convênio Ativado";
+                    descontoAplicadoSpan.style.display = 'block';
+                    descontoAplicadoSpan.style.color = 'var(--hospital-accent)';
+                }
+                else {
                     descontoAplicadoSpan.style.display = 'none';
                 }
             }
@@ -682,12 +707,12 @@
         }
 
         function closeOtherPanels(currentPanelId) {
-            [dipironaList, receitasList, anotacoesBox, gessoInfoList].forEach(panel => {
+            [dipironaList, duvidasFrequentesList, anotacoesBox, gessoInfoList].forEach(panel => { // Alterado
                 if (panel && panel.id !== currentPanelId) panel.style.display = 'none';
             });
         }
         function toggleDipironaList() { closeOtherPanels('dipironaList'); dipironaList.style.display = dipironaList.style.display === 'block' ? 'none' : 'block'; resetInactivityTimer(); }
-        function toggleReceitasList() { closeOtherPanels('receitasList'); receitasList.style.display = receitasList.style.display === 'block' ? 'none' : 'block'; resetInactivityTimer(); }
+        function toggleDuvidasFrequentesList() { closeOtherPanels('duvidasFrequentesList'); duvidasFrequentesList.style.display = duvidasFrequentesList.style.display === 'block' ? 'none' : 'block'; resetInactivityTimer(); } // Alterado
         function toggleAnotacoes() { closeOtherPanels('anotacoesBox'); anotacoesBox.style.display = anotacoesBox.style.display === 'block' ? 'none' : 'block'; resetInactivityTimer(); }
         function toggleGessoInfoList() { closeOtherPanels('gessoInfoList'); gessoInfoList.style.display = gessoInfoList.style.display === 'block' ? 'none' : 'block'; resetInactivityTimer(); }
 
@@ -803,7 +828,15 @@
             const value = parseInt(buttonElement.dataset.value, 10);
             if (isNaN(value)) return;
 
-            if (!extraItemsState[name]) extraItemsState[name] = { value: value, active: false };
+            // Initialize extraItemsState entry if it doesn't exist, ensure it has `active`
+            if (!extraItemsState[name]) {
+                extraItemsState[name] = { value: value, active: false };
+                // Copy precoConvenio from data-set if it exists, for Raio-X and Gesso
+                if (buttonElement.dataset.precoConvenio) {
+                    extraItemsState[name].precoConvenio = parseInt(buttonElement.dataset.precoConvenio, 10);
+                }
+            }
+
             extraItemsState[name].active = !extraItemsState[name].active;
             buttonElement.classList.toggle('active', extraItemsState[name].active);
             atualizarTotal();
@@ -819,10 +852,10 @@
             if (atendimentoCheckbox) atendimentoCheckbox.checked = false;
             if (cnpjCheckbox) cnpjCheckbox.checked = false;
             if (pmArcanjoCheckbox) pmArcanjoCheckbox.checked = false;
+            if (convenioCheckbox) convenioCheckbox.checked = false;
 
             Object.keys(extraItemsState).forEach(name => extraItemsState[name].active = false);
             document.querySelectorAll('.extra-toggle-button.active').forEach(btn => btn.classList.remove('active'));
-            // This includes Raio-X, Gesso, Queimadura if they are active in summary card
             document.querySelectorAll('.total-summary-box .extra-toggle-button.active').forEach(btn => btn.classList.remove('active'));
 
 
@@ -831,7 +864,7 @@
             });
 
             atualizarTotal();
-            [dipironaList, receitasList, anotacoesBox, gessoInfoList].forEach(panel => panel.style.display = 'none');
+            [dipironaList, duvidasFrequentesList, anotacoesBox, gessoInfoList].forEach(panel => panel.style.display = 'none'); // Alterado
             anotacoesArea.value = '';
             localStorage.removeItem('anotacoesCalculadora');
 
@@ -1015,7 +1048,7 @@
                 </div>
                 <div class="checkbox-group">
                     <label class="checkbox-item">
-                        <input type="checkbox" id="atendimentoCheckbox"> + Atendimento (R$ 1000)
+                        <input type="checkbox" id="atendimentoCheckbox"> + Atendimento (R$ 2000)
                     </label>
                     <label class="checkbox-item">
                         <input type="checkbox" id="cnpjCheckbox"> Desconto CNPJ
@@ -1023,11 +1056,14 @@
                     <label class="checkbox-item">
                         <input type="checkbox" id="pmArcanjoCheckbox"> Desconto PM/Arcanjo
                     </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="convenioCheckbox"> Desconto Convênio
+                    </label>
                 </div>
                 <button id="resetButton" class="reset-button">RESETAR TUDO</button>
                 <div class="card-extra-buttons-container">
-                    <button class="extra-toggle-button" data-name="Raio-X" data-value="1600" onclick="toggleExtra(this)">Raio-x</button>
-                    <button class="extra-toggle-button" data-name="Gesso" data-value="1600" onclick="toggleExtra(this)">Gesso</button>
+                    <button class="extra-toggle-button" data-name="Raio-X" data-value="2500" data-preco-convenio="2000" onclick="toggleExtra(this)">Raio-x</button>
+                    <button class="extra-toggle-button" data-name="Gesso" data-value="2500" data-preco-convenio="2000" onclick="toggleExtra(this)">Gesso</button>
                     <button class="extra-toggle-button" data-name="Queimadura" data-value="1600" onclick="toggleExtra(this)">Queimadura</button>
                 </div>
                 <div class="total-breakdown">
@@ -1042,16 +1078,31 @@
             atendimentoCheckbox = document.getElementById('atendimentoCheckbox');
             cnpjCheckbox = document.getElementById('cnpjCheckbox');
             pmArcanjoCheckbox = document.getElementById('pmArcanjoCheckbox');
+            convenioCheckbox = document.getElementById('convenioCheckbox');
             resetButtonElement = document.getElementById('resetButton');
 
             atendimentoCheckbox.addEventListener('change', () => { atualizarTotal(); resetInactivityTimer(); });
             cnpjCheckbox.addEventListener('change', () => {
-                if (cnpjCheckbox.checked && pmArcanjoCheckbox.checked) pmArcanjoCheckbox.checked = false;
+                if (cnpjCheckbox.checked) {
+                    if (pmArcanjoCheckbox.checked) pmArcanjoCheckbox.checked = false;
+                    if (convenioCheckbox.checked) convenioCheckbox.checked = false;
+                }
                 atualizarTotal();
                 resetInactivityTimer();
             });
             pmArcanjoCheckbox.addEventListener('change', () => {
-                if (pmArcanjoCheckbox.checked && cnpjCheckbox.checked) cnpjCheckbox.checked = false;
+                if (pmArcanjoCheckbox.checked) {
+                    if (cnpjCheckbox.checked) cnpjCheckbox.checked = false;
+                    if (convenioCheckbox.checked) convenioCheckbox.checked = false;
+                }
+                atualizarTotal();
+                resetInactivityTimer();
+            });
+            convenioCheckbox.addEventListener('change', () => {
+                if (convenioCheckbox.checked) {
+                    if (cnpjCheckbox.checked) cnpjCheckbox.checked = false;
+                    if (pmArcanjoCheckbox.checked) pmArcanjoCheckbox.checked = false;
+                }
                 atualizarTotal();
                 resetInactivityTimer();
             });
@@ -1071,7 +1122,7 @@
                 localStorage.removeItem('anotacoesCalculadora');
                 resetInactivityTimer();
             });
-            resetInactivityTimer(); // Initialize the timer on load
+            resetInactivityTimer();
         });
     </script>
 </body>
