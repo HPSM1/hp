@@ -581,13 +581,13 @@
 
     <script>
         const produtosBase = [
-            { nome: 'Adrenalina', precoBase: 12000, precoCNPJ: 9500, precoPMArcanjo: 9500, precoConvenio: 9500, maximo: 3, imagem: 'adrenalina.png' },
-            { nome: 'Analgésico', precoBase: 600,  precoCNPJ: 500, precoPMArcanjo: 500, precoConvenio: 500, maximo: 10, imagem: 'analgesico.png' },
-            { nome: 'Atadura',      precoBase: 300,  precoCNPJ: 250, precoPMArcanjo: 250, precoConvenio: 250, maximo: 10, imagem: 'atadura.png' },
-            { nome: 'Bandagem',    precoBase: 500,  precoCNPJ: 400, precoPMArcanjo: 400, precoConvenio: 400, maximo: 5,  imagem: 'bandagem.png' },
-            { nome: 'Medkit',      precoBase: 2500, precoCNPJ: 2000, precoPMArcanjo: 2000, precoConvenio: 2000, maximo: 2,  imagem: 'medkit.png' },
-            { nome: 'Ritmoneury', precoBase: 800,  precoCNPJ: 600, precoPMArcanjo: 600, precoConvenio: 600, maximo: 5,  imagem: 'ritmoneury.png' },
-            { nome: 'Sinkalm',     precoBase: 800,  precoCNPJ: 600, precoPMArcanjo: 600, precoConvenio: 600, maximo: 5,  imagem: 'sinkalmy.png' },
+            { nome: 'Adrenalina', precoBase: 12000, precoCNPJ: 9500, precoPMArcanjo: 9000, precoConvenio: 9500, maximo: 3, imagem: 'adrenalina.png' },
+            { nome: 'Analgésico', precoBase: 600,   precoCNPJ: 500, precoPMArcanjo: 450, precoConvenio: 500, maximo: 10, imagem: 'analgesico.png' },
+            { nome: 'Atadura',    precoBase: 300,   precoCNPJ: 250, precoPMArcanjo: 200, precoConvenio: 250, maximo: 10, imagem: 'atadura.png' },
+            { nome: 'Bandagem',   precoBase: 500,   precoCNPJ: 400, precoPMArcanjo: 350, precoConvenio: 400, maximo: 5,  imagem: 'bandagem.png' },
+            { nome: 'Medkit',     precoBase: 2500,  precoCNPJ: 2000, precoPMArcanjo: 1500, precoConvenio: 2000, maximo: 2,  imagem: 'medkit.png' },
+            { nome: 'Ritmoneury', precoBase: 800,   precoCNPJ: 600, precoPMArcanjo: 600, precoConvenio: 600, maximo: 5,  imagem: 'ritmoneury.png' },
+            { nome: 'Sinkalm',    precoBase: 800,   precoCNPJ: 600, precoPMArcanjo: 500, precoConvenio: 600, maximo: 5,  imagem: 'sinkalmy.png' },
         ];
 
         const quantidades = {};
@@ -599,7 +599,6 @@
         let x10count = 0;
 
         const ABSOLUTE_ITEM_CAP = 99;
-
         const itemsContainer = document.getElementById('items');
         const dipironaList = document.getElementById('dipironaList');
         const duvidasFrequentesList = document.getElementById('duvidasFrequentesList'); // Alterado
@@ -677,8 +676,8 @@
             const valorAtendimentoBase = 2000;
             const valorAtendimentoConvenio = 1500;
             const valorAtendimento = (atendimentoCheckbox && atendimentoCheckbox.checked)
-                                     ? (isConvenioChecked ? valorAtendimentoConvenio : valorAtendimentoBase)
-                                     : 0;
+                                       ? (isConvenioChecked ? valorAtendimentoConvenio : valorAtendimentoBase)
+                                       : 0;
 
             const valor10x10Total = x10count * 5000;
             const totalFinal = subtotalItens + totalExtras + valorAtendimento + valor10x10Total;
